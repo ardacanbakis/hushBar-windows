@@ -12,7 +12,7 @@ and UI toolkit); only the product concept, branding, and UX are shared.
 
 Swift + CoreAudio + AppKit and C# + WASAPI + WPF share zero source. The only
 common assets are icons, brand, and docs. Keeping the toolchains isolated means
-each repo's tooling assumptions stay intact and CI/releases stay independent.
+each repo’s tooling assumptions stay intact and CI/releases stay independent.
 The two repos cross-link in their READMEs.
 
 ---
@@ -36,7 +36,7 @@ window and the WinForms tray icon coexist.
 
 ---
 
-## How muting works on Windows (the analog to the Mac's CoreAudio knowledge)
+## How muting works on Windows (the analog to the Mac’s CoreAudio knowledge)
 
 ```
 MMDeviceEnumerator
@@ -64,12 +64,12 @@ MMDeviceEnumerator
 
 ## The one big UX divergence: the tray icon is not a text pill
 
-macOS lets the menu bar show an arbitrary-width text badge ("ON AIR", "Live·Muted").
+macOS lets the menu bar show an arbitrary-width text badge (“ON AIR”, “Live·Muted”).
 The Windows tray is a **fixed 16/32 px icon** — you cannot render a wide text pill there.
 
 Approach:
 - Render a **32×32 icon dynamically** (GDI+ / `System.Drawing`) showing a mic glyph
-  tinted with the preset's on/off color, with a slash when muted. See
+  tinted with the preset’s on/off color, with a slash when muted. See
   `Services/TrayIconRenderer.cs`.
 - Put the preset **label text in the tooltip** (`NotifyIcon.Text`).
 - Optional later: a small **flyout window** anchored above the tray that shows the
@@ -100,10 +100,12 @@ So `BarPreset` keeps its colors/labels/state, but the *primary* surface is an ic
 - `RegisterHotKey` (default **Ctrl+Shift+M**) via a message-only `HwndSource`.
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` toggle.
 
-### Phase 4 — Preferences UI  (TODO — WPF)
+### Phase 4 — Preferences UI  ✅ built
 - WPF window: preset list + editor (name, colors, on/off labels), sound toggle,
-  hotkey rebind, launch-at-login, mic status. JSON-persisted settings.
-- Reuse the conceptual preset model from `Models/`.
+  launch-at-login, mic status. JSON-persisted settings.
+- Color picker popup with 12-swatch palette (system colors matching macOS HIG).
+- Live preview of on/off pill badges. Add/remove presets.
+- Reuses the `BarPreset` / `AppSettings` models from `Models/`.
 
 ### Phase 5 — Distribution
 - **Code signing:** Authenticode cert (DigiCert/Sectigo ~$100–400/yr) or
@@ -166,7 +168,7 @@ dotnet run --project src/HushBar
 
 ## Cross-linking
 
-- Add to the macOS repo README: "**Windows version:** ardacanbakis/hushBar-windows" ✅ done.
-- Add to this README: "**macOS version:** ardacanbakis/hushBar" ✅ done.
+- Add to the macOS repo README: “**Windows version:** ardacanbakis/hushBar-windows” ✅ done.
+- Add to this README: “**macOS version:** ardacanbakis/hushBar” ✅ done.
 - Consider a shared landing page on the existing GitHub Pages site listing both
   downloads (Mac DMG/Homebrew, Windows MSI/winget).

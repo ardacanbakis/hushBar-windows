@@ -97,7 +97,7 @@ public partial class App : Application
     {
         if (_prefs is null)
         {
-            _prefs = new PreferencesWindow(_settings);
+            _prefs = new PreferencesWindow(_settings, _mic);
             _prefs.Closed += (_, _) => { _settings.Save(); RefreshTray(); _prefs = null; };
         }
         _prefs.Show();
