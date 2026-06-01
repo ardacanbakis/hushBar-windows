@@ -9,6 +9,7 @@ using WpfButton = System.Windows.Controls.Button;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using DrawingColor = System.Drawing.Color;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace HushBar;
 
