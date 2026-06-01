@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using HushBar.Models;
 using HushBar.Services;
@@ -14,13 +16,16 @@ public partial class PreferencesWindow : Window
 {
     private readonly AppSettings _settings;
     private readonly MicMuteService? _mic;
+    private readonly HotKeyManager? _hotKey;
+    private readonly Action? _onSettingsChanged;
     private bool _loading;
+    private bool _recording;
 
     private static readonly DrawingColor[] Palette =
     {
+        DrawingColor.FromArgb(255, 255, 59, 48),
         DrawingColor.FromArgb(255, 52, 199, 89),
         DrawingColor.FromArgb(255, 0, 122, 255),
-        DrawingColor.FromArgb(255, 255, 59, 48),
         DrawingColor.FromArgb(255, 255, 149, 0),
         DrawingColor.FromArgb(255, 175, 82, 222),
         DrawingColor.FromArgb(255, 255, 204, 0),
@@ -30,16 +35,23 @@ public partial class PreferencesWindow : Window
         DrawingColor.FromArgb(255, 0, 199, 190),
         DrawingColor.FromArgb(255, 142, 142, 147),
         DrawingColor.FromArgb(255, 72, 72, 74),
+        DrawingColor.White,
+        DrawingColor.Black,
     };
 
-    public PreferencesWindow(AppSettings settings, MicMuteService? mic = null)
+    public PreferencesWindow(AppSettings settings, MicMuteService? mic = null,
+                             HotKeyManager? hotKey = null, Action? onSettingsChanged = null)
     {
         InitializeComponent();
         _settings = settings;
         _mic = mic;
+        _hotKey = hotKey;
+        _onSettingsChanged = onSettingsChanged;
 
-        PopulateColorPalette(OnColorPalette, isOnColor: true);
-        PopulateColorPalette(OffColorPalette, isOnColor: false);
+        PopulateColorPalette(OnColorPalette, ColorTarget.BadgeOn);
+        PopulateColorPalette(OnTextColorPalette, ColorTarget.TextOn);
+        PopulateColorPalette(OffColorPalette, ColorTarget.BadgeOff);
+        PopulateColorPalette(OffTextColorPalette, ColorTarget.TextOff);
 
         SoundCheck.IsChecked = _settings.PlaySoundOnToggle;
         SoundCheck.Checked += (_, _) => _settings.PlaySoundOnToggle = true;
@@ -49,12 +61,113 @@ public partial class PreferencesWindow : Window
         StartupCheck.Checked += (_, _) => StartupManager.IsEnabled = true;
         StartupCheck.Unchecked += (_, _) => StartupManager.IsEnabled = false;
 
+        HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
+
         RefreshPresetList();
+        UpdateGeneralPreview();
         UpdateMicStatus();
 
         if (_mic is not null)
             _mic.MuteChanged += _ => Dispatcher.Invoke(UpdateMicStatus);
     }
+
+    // ── Tab switching ──
+
+    private void OnTabChanged(object sender, RoutedEventArgs e)
+    {
+        GeneralPanel.Visibility = TabGeneral.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        StylePanel.Visibility = TabStyle.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        AboutPanel.Visibility = TabAbout.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ── General tab ──
+
+    private void UpdateGeneralPreview()
+    {
+        var preset = _settings.SelectedPreset;
+        GenPreviewOnBorder.Background = ToBrush(preset.OnColor);
+        GenPreviewOnText.Text = preset.OnText;
+        GenPreviewOnText.Foreground = ToBrush(preset.OnTextColor);
+        GenPreviewOffBorder.Background = ToBrush(preset.OffColor);
+        GenPreviewOffText.Text = preset.OffText;
+        GenPreviewOffText.Foreground = ToBrush(preset.OffTextColor);
+        GenPreviewName.Text = preset.Name;
+    }
+
+    private void UpdateMicStatus()
+    {
+        if (_mic is null)
+        {
+            MicStatusText.Foreground = WpfBrushes.Gray;
+            MicStatusText.Text = "Unavailable";
+            return;
+        }
+        bool muted = _mic.IsMuted;
+        MicStatusText.Foreground = muted ? WpfBrushes.Red : WpfBrushes.LimeGreen;
+        MicStatusText.Text = muted ? "Muted" : "Live";
+    }
+
+    // ── Hotkey capture ──
+
+    private void OnHotKeyRecord(object sender, RoutedEventArgs e)
+    {
+        if (!_recording)
+        {
+            _recording = true;
+            HotKeyRecordBtn.Content = "Stop";
+            HotKeyHint.Visibility = Visibility.Visible;
+            HotKeyDisplay.Text = "Press keys...";
+            PreviewKeyDown += OnHotKeyCapture;
+            Focus();
+        }
+        else
+        {
+            StopRecording();
+        }
+    }
+
+    private void OnHotKeyCapture(object sender, KeyEventArgs e)
+    {
+        e.Handled = true;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+        if (key == Key.LeftCtrl || key == Key.RightCtrl ||
+            key == Key.LeftAlt || key == Key.RightAlt ||
+            key == Key.LeftShift || key == Key.RightShift ||
+            key == Key.LWin || key == Key.RWin)
+            return;
+
+        uint mods = 0;
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            mods |= HotKeyManager.MOD_CONTROL;
+        if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
+            mods |= HotKeyManager.MOD_ALT;
+        if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+            mods |= HotKeyManager.MOD_SHIFT;
+
+        if (mods == 0) return;
+
+        uint vk = (uint)KeyInterop.VirtualKeyFromKey(key);
+        if (vk == 0) return;
+
+        _settings.HotKeyModifiers = mods;
+        _settings.HotKeyVk = vk;
+        _hotKey?.Rebind(mods, vk);
+        HotKeyDisplay.Text = HotKeyManager.Describe(mods, vk);
+        StopRecording();
+    }
+
+    private void StopRecording()
+    {
+        _recording = false;
+        HotKeyRecordBtn.Content = "Record";
+        HotKeyHint.Visibility = Visibility.Collapsed;
+        PreviewKeyDown -= OnHotKeyCapture;
+        if (HotKeyDisplay.Text == "Press keys...")
+            HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
+    }
+
+    // ── Style tab: preset list ──
 
     private void RefreshPresetList()
     {
@@ -71,8 +184,6 @@ public partial class PreferencesWindow : Window
     private void OnPresetSelected(object sender, SelectionChangedEventArgs e)
     {
         if (_loading) return;
-        if (PresetList.SelectedItem is BarPreset preset)
-            _settings.SelectedPresetId = preset.Id;
         LoadSelectedPreset();
     }
 
@@ -90,10 +201,12 @@ public partial class PreferencesWindow : Window
         OnTextBox.Text = preset.OnText;
         OffTextBox.Text = preset.OffText;
         OnColorBtn.Background = ToBrush(preset.OnColor);
+        OnTextColorBtn.Background = ToBrush(preset.OnTextColor);
         OffColorBtn.Background = ToBrush(preset.OffColor);
+        OffTextColorBtn.Background = ToBrush(preset.OffTextColor);
         _loading = false;
 
-        UpdatePreview();
+        UpdateStylePreview();
     }
 
     private void OnNameChanged(object sender, TextChangedEventArgs e)
@@ -107,20 +220,38 @@ public partial class PreferencesWindow : Window
     {
         if (_loading || SelectedPreset is null) return;
         SelectedPreset.OnText = OnTextBox.Text;
-        UpdatePreview();
+        UpdateStylePreview();
     }
 
     private void OnOffTextChanged(object sender, TextChangedEventArgs e)
     {
         if (_loading || SelectedPreset is null) return;
         SelectedPreset.OffText = OffTextBox.Text;
-        UpdatePreview();
+        UpdateStylePreview();
     }
 
-    private void OnOnColorClick(object sender, RoutedEventArgs e) => OnColorPopup.IsOpen = true;
-    private void OnOffColorClick(object sender, RoutedEventArgs e) => OffColorPopup.IsOpen = true;
+    private void UpdateStylePreview()
+    {
+        var preset = SelectedPreset;
+        if (preset is null) return;
+        PreviewOnBorder.Background = ToBrush(preset.OnColor);
+        PreviewOnText.Text = preset.OnText;
+        PreviewOnText.Foreground = ToBrush(preset.OnTextColor);
+        PreviewOffBorder.Background = ToBrush(preset.OffColor);
+        PreviewOffText.Text = preset.OffText;
+        PreviewOffText.Foreground = ToBrush(preset.OffTextColor);
+    }
 
-    private void PopulateColorPalette(WrapPanel panel, bool isOnColor)
+    // ── Color pickers ──
+
+    private enum ColorTarget { BadgeOn, TextOn, BadgeOff, TextOff }
+
+    private void OnOnColorClick(object sender, RoutedEventArgs e) => OnColorPopup.IsOpen = true;
+    private void OnOnTextColorClick(object sender, RoutedEventArgs e) => OnTextColorPopup.IsOpen = true;
+    private void OnOffColorClick(object sender, RoutedEventArgs e) => OffColorPopup.IsOpen = true;
+    private void OnOffTextColorClick(object sender, RoutedEventArgs e) => OffTextColorPopup.IsOpen = true;
+
+    private void PopulateColorPalette(WrapPanel panel, ColorTarget target)
     {
         foreach (var color in Palette)
         {
@@ -134,23 +265,36 @@ public partial class PreferencesWindow : Window
             {
                 if (SelectedPreset is null) return;
                 var c = (DrawingColor)btn.Tag;
-                if (isOnColor)
+                switch (target)
                 {
-                    SelectedPreset.OnColorArgb = c.ToArgb();
-                    OnColorBtn.Background = ToBrush(c);
-                    OnColorPopup.IsOpen = false;
+                    case ColorTarget.BadgeOn:
+                        SelectedPreset.OnColorArgb = c.ToArgb();
+                        OnColorBtn.Background = ToBrush(c);
+                        OnColorPopup.IsOpen = false;
+                        break;
+                    case ColorTarget.TextOn:
+                        SelectedPreset.OnTextColorArgb = c.ToArgb();
+                        OnTextColorBtn.Background = ToBrush(c);
+                        OnTextColorPopup.IsOpen = false;
+                        break;
+                    case ColorTarget.BadgeOff:
+                        SelectedPreset.OffColorArgb = c.ToArgb();
+                        OffColorBtn.Background = ToBrush(c);
+                        OffColorPopup.IsOpen = false;
+                        break;
+                    case ColorTarget.TextOff:
+                        SelectedPreset.OffTextColorArgb = c.ToArgb();
+                        OffTextColorBtn.Background = ToBrush(c);
+                        OffTextColorPopup.IsOpen = false;
+                        break;
                 }
-                else
-                {
-                    SelectedPreset.OffColorArgb = c.ToArgb();
-                    OffColorBtn.Background = ToBrush(c);
-                    OffColorPopup.IsOpen = false;
-                }
-                UpdatePreview();
+                UpdateStylePreview();
             };
             panel.Children.Add(btn);
         }
     }
+
+    // ── Preset actions ──
 
     private void OnAddPreset(object sender, RoutedEventArgs e)
     {
@@ -166,30 +310,52 @@ public partial class PreferencesWindow : Window
         _settings.Presets.Remove(SelectedPreset);
         _settings.SelectedPresetId = _settings.Presets[0].Id;
         RefreshPresetList();
+        UpdateGeneralPreview();
     }
 
-    private void UpdatePreview()
+    private void OnUsePreset(object sender, RoutedEventArgs e)
     {
-        var preset = SelectedPreset;
-        if (preset is null) return;
-        PreviewOnBorder.Background = ToBrush(preset.OnColor);
-        PreviewOnText.Text = preset.OnText;
-        PreviewOffBorder.Background = ToBrush(preset.OffColor);
-        PreviewOffText.Text = preset.OffText;
+        if (SelectedPreset is null) return;
+        _settings.SelectedPresetId = SelectedPreset.Id;
+        UpdateGeneralPreview();
+        _onSettingsChanged?.Invoke();
     }
 
-    private void UpdateMicStatus()
+    private void OnDuplicatePreset(object sender, RoutedEventArgs e)
     {
-        if (_mic is null)
-        {
-            MicDot.Fill = WpfBrushes.Gray;
-            MicStatusText.Text = "Mic service unavailable";
-            return;
-        }
-        bool muted = _mic.IsMuted;
-        MicDot.Fill = muted ? WpfBrushes.Red : WpfBrushes.LimeGreen;
-        MicStatusText.Text = muted ? "Muted" : "Live";
+        if (SelectedPreset is null) return;
+        var clone = SelectedPreset.Clone();
+        _settings.Presets.Add(clone);
+        _settings.SelectedPresetId = clone.Id;
+        RefreshPresetList();
     }
+
+    private void OnResetPresets(object sender, RoutedEventArgs e)
+    {
+        _settings.Presets = BarPreset.Defaults();
+        _settings.SelectedPresetId = _settings.Presets[0].Id;
+        RefreshPresetList();
+        UpdateGeneralPreview();
+        _onSettingsChanged?.Invoke();
+    }
+
+    // ── About tab links ──
+
+    private static void OpenUrl(string url)
+    {
+        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { }
+    }
+
+    private void OnBuyMeACoffee(object sender, RoutedEventArgs e) => OpenUrl("https://buymeacoffee.com/ardacanbakis");
+    private void OnOpenWebsite(object sender, RoutedEventArgs e) => OpenUrl("https://ardacanbakis.com");
+    private void OnOpenGitHub(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/ardacanbakis");
+    private void OnOpenInstagram(object sender, RoutedEventArgs e) => OpenUrl("https://instagram.com/ardacanbakis");
+    private void OnOpenYouTube(object sender, RoutedEventArgs e) => OpenUrl("https://youtube.com/@ardacanbakis");
+    private void OnOpenSpotify(object sender, RoutedEventArgs e) => OpenUrl("https://open.spotify.com/artist/ardacanbakis");
+    private void OnOpenLinkedIn(object sender, RoutedEventArgs e) => OpenUrl("https://linkedin.com/in/ardacanbakis");
+
+    // ── Helpers ──
 
     private static SolidColorBrush ToBrush(DrawingColor c) =>
         new(WpfColor.FromArgb(c.A, c.R, c.G, c.B));

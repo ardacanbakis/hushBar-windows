@@ -2,41 +2,59 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="HushBar Preferences"
-        Width="520" Height="460"
+        Width="680" Height="580"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
-        Background="#F5F5F5">
+        Background="#1E1E1E">
     <Window.Resources>
+        <SolidColorBrush x:Key="CardBg" Color="#2D2D2D"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#3E3E3E"/>
+        <SolidColorBrush x:Key="FgPrimary" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="FgSecondary" Color="#999"/>
+        <SolidColorBrush x:Key="Accent" Color="#0A84FF"/>
+
         <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="#888"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource FgSecondary}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
         </Style>
-        <Style x:Key="FieldBox" TargetType="TextBox">
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="Padding" Value="4,2"/>
+        <Style x:Key="DarkTextBox" TargetType="TextBox">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="6,3"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#383838"/>
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CaretBrush" Value="White"/>
+        </Style>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
         <Style x:Key="ColorSwatch" TargetType="Button">
-            <Setter Property="Width" Value="40"/>
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="24"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" CornerRadius="4"
-                                BorderThickness="1.5" BorderBrush="#CCC"
+                                BorderThickness="1.5" BorderBrush="#555"
                                 Background="{TemplateBinding Background}"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#666"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#AAA"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -56,165 +74,374 @@
                                 Background="{TemplateBinding Background}"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#333"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="DarkCheck" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style x:Key="SmallBtn" TargetType="Button">
+            <Setter Property="Background" Value="#383838"/>
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="LinkBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   TextDecorations="Underline"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="160"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <!-- Left: Preset list -->
-        <DockPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock DockPanel.Dock="Top" Text="HushBar" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,2"/>
-            <TextBlock DockPanel.Dock="Top" Foreground="#999" FontSize="11" Margin="0,0,0,10"
-                       Text="Global mic mute from the tray."/>
-
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
-                <Button x:Name="AddBtn" Content="+" Width="28" Height="24" Click="OnAddPreset"
-                        FontSize="14" FontWeight="Bold" Margin="0,0,4,0"/>
-                <Button x:Name="RemoveBtn" Content="&#x2212;" Width="28" Height="24" Click="OnRemovePreset"
-                        FontSize="14" FontWeight="Bold"/>
+    <DockPanel>
+        <!-- Tab bar -->
+        <Border DockPanel.Dock="Top" Background="#252525" BorderBrush="#3E3E3E" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                <RadioButton x:Name="TabGeneral" Content="General" GroupName="Tabs"
+                             IsChecked="True" Click="OnTabChanged"
+                             Foreground="{StaticResource FgPrimary}" FontSize="13"
+                             Margin="0,0,4,0" Padding="14,6"
+                             Style="{StaticResource {x:Type ToggleButton}}"/>
+                <RadioButton x:Name="TabStyle" Content="Style" GroupName="Tabs"
+                             Click="OnTabChanged"
+                             Foreground="{StaticResource FgPrimary}" FontSize="13"
+                             Margin="0,0,4,0" Padding="14,6"
+                             Style="{StaticResource {x:Type ToggleButton}}"/>
+                <RadioButton x:Name="TabAbout" Content="About" GroupName="Tabs"
+                             Click="OnTabChanged"
+                             Foreground="{StaticResource FgPrimary}" FontSize="13"
+                             Padding="14,6"
+                             Style="{StaticResource {x:Type ToggleButton}}"/>
             </StackPanel>
+        </Border>
 
-            <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}" Text="PRESETS"/>
-            <ListBox x:Name="PresetList" SelectionChanged="OnPresetSelected"
-                     DisplayMemberPath="Name" BorderThickness="1" BorderBrush="#DDD"/>
-        </DockPanel>
-
-        <!-- Right: Editor + settings -->
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <!-- Preset editor -->
-                <Border x:Name="EditorPanel" Background="White" CornerRadius="6"
-                        BorderThickness="1" BorderBrush="#DDD" Padding="14" Margin="0,0,0,12">
+        <!-- ========== GENERAL TAB ========== -->
+        <ScrollViewer x:Name="GeneralPanel" VerticalScrollBarVisibility="Auto" Padding="24,16">
+            <StackPanel Width="400" HorizontalAlignment="Center">
+                <!-- Current Style preview -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="PRESET EDITOR"/>
-
-                        <!-- Name -->
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="Name"/>
-                            <TextBox x:Name="NameBox" Grid.Column="1" Style="{StaticResource FieldBox}"
-                                     TextChanged="OnNameChanged"/>
-                        </Grid>
-
-                        <!-- On label -->
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="On label"/>
-                            <TextBox x:Name="OnTextBox" Grid.Column="1" Style="{StaticResource FieldBox}"
-                                     TextChanged="OnOnTextChanged"/>
-                        </Grid>
-
-                        <!-- Off label -->
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="Off label"/>
-                            <TextBox x:Name="OffTextBox" Grid.Column="1" Style="{StaticResource FieldBox}"
-                                     TextChanged="OnOffTextChanged"/>
-                        </Grid>
-
-                        <!-- On color -->
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="On color"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Button x:Name="OnColorBtn" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOnColorClick"/>
-                                <Popup x:Name="OnColorPopup" StaysOpen="False"
-                                       Placement="Bottom" PlacementTarget="{Binding ElementName=OnColorBtn}"
-                                       AllowsTransparency="True">
-                                    <Border Background="White" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#CCC">
-                                        <WrapPanel x:Name="OnColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Off color -->
-                        <Grid Margin="0,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="Off color"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Button x:Name="OffColorBtn" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOffColorClick"/>
-                                <Popup x:Name="OffColorPopup" StaysOpen="False"
-                                       Placement="Bottom" PlacementTarget="{Binding ElementName=OffColorBtn}"
-                                       AllowsTransparency="True">
-                                    <Border Background="White" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#CCC">
-                                        <WrapPanel x:Name="OffColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- Preview -->
-                <Border Background="White" CornerRadius="6"
-                        BorderThickness="1" BorderBrush="#DDD" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="PREVIEW"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,4">
-                            <Border x:Name="PreviewOnBorder" CornerRadius="4" Padding="10,4" Margin="0,0,8,0">
-                                <TextBlock x:Name="PreviewOnText" FontSize="12" FontWeight="SemiBold"
-                                           Foreground="White"/>
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Current Style"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Border x:Name="GenPreviewOnBorder" CornerRadius="6" Padding="14,6" Margin="0,0,8,0">
+                                <TextBlock x:Name="GenPreviewOnText" FontSize="13" FontWeight="Bold"/>
                             </Border>
-                            <Border x:Name="PreviewOffBorder" CornerRadius="4" Padding="10,4">
-                                <TextBlock x:Name="PreviewOffText" FontSize="12" FontWeight="SemiBold"
-                                           Foreground="White"/>
+                            <Border x:Name="GenPreviewOffBorder" CornerRadius="6" Padding="14,6" Margin="0,0,12,0">
+                                <TextBlock x:Name="GenPreviewOffText" FontSize="13" FontWeight="Bold"/>
                             </Border>
+                            <TextBlock x:Name="GenPreviewName" FontSize="13" VerticalAlignment="Center"
+                                       Foreground="{StaticResource FgPrimary}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <!-- General settings -->
-                <Border Background="White" CornerRadius="6"
-                        BorderThickness="1" BorderBrush="#DDD" Padding="14" Margin="0,0,0,12">
+                <!-- Global Shortcut -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="GENERAL"/>
-                        <CheckBox x:Name="SoundCheck" Content="Play sound on toggle" Margin="0,4"/>
-                        <CheckBox x:Name="StartupCheck" Content="Launch at login" Margin="0,4"/>
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Global Shortcut"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="Toggle mute:"
+                                       Margin="0,0,12,0"/>
+                            <Border Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10,4"
+                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                                <TextBlock x:Name="HotKeyDisplay" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
+                            </Border>
+                            <Button x:Name="HotKeyRecordBtn" Grid.Column="2" Content="Record"
+                                    Style="{StaticResource SmallBtn}" Margin="8,0,0,0"
+                                    Click="OnHotKeyRecord"/>
+                        </Grid>
+                        <TextBlock x:Name="HotKeyHint" FontSize="11" Foreground="{StaticResource FgSecondary}"
+                                   Margin="0,6,0,0" Visibility="Collapsed"
+                                   Text="Press a key combination, then click Stop."/>
                     </StackPanel>
                 </Border>
 
-                <!-- Mic status -->
-                <Border Background="White" CornerRadius="6"
-                        BorderThickness="1" BorderBrush="#DDD" Padding="14">
+                <!-- Settings -->
+                <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="MICROPHONE"/>
+                        <CheckBox x:Name="StartupCheck" Content="Launch HushBar at login"
+                                  Style="{StaticResource DarkCheck}"/>
+                        <CheckBox x:Name="SoundCheck" Content="Play sound on toggle"
+                                  Style="{StaticResource DarkCheck}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Microphone -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Microphone"/>
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse x:Name="MicDot" Width="10" Height="10" Margin="0,0,8,0"/>
-                            <TextBlock x:Name="MicStatusText" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="Microphone" FontSize="13" Foreground="{StaticResource FgPrimary}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="MicStatusText" FontSize="13" FontWeight="SemiBold"
+                                       Margin="16,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </ScrollViewer>
-    </Grid>
+
+        <!-- ========== STYLE TAB ========== -->
+        <Grid x:Name="StylePanel" Visibility="Collapsed" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: preset list -->
+            <DockPanel Grid.Column="0" Margin="0,0,12,0">
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="+" Width="32" Height="26" Click="OnAddPreset"
+                            Style="{StaticResource SmallBtn}" FontSize="16" FontWeight="Bold" Margin="0,0,4,0"/>
+                    <Button Content="&#x2212;" Width="32" Height="26" Click="OnRemovePreset"
+                            Style="{StaticResource SmallBtn}" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+                <ListBox x:Name="PresetList" SelectionChanged="OnPresetSelected"
+                         Background="#252525" Foreground="{StaticResource FgPrimary}"
+                         BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="2">
+                                <Border x:Name="PillPreview" CornerRadius="4" Padding="8,2" Margin="0,0,8,0"
+                                        Background="Gray">
+                                    <TextBlock Text="{Binding OnText}" FontSize="11" FontWeight="Bold"
+                                               Foreground="White"/>
+                                </Border>
+                                <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"
+                                           Foreground="#E0E0E0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Right: editor -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="EditorPanel">
+                    <!-- Preview -->
+                    <Border Style="{StaticResource Card}" Padding="20">
+                        <StackPanel HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                                <Border x:Name="PreviewOnBorder" CornerRadius="8" Padding="18,8" Margin="0,0,12,0">
+                                    <TextBlock x:Name="PreviewOnText" FontSize="15" FontWeight="Bold"/>
+                                </Border>
+                                <Border x:Name="PreviewOffBorder" CornerRadius="8" Padding="18,8">
+                                    <TextBlock x:Name="PreviewOffText" FontSize="15" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                                <TextBlock Text="On" FontSize="11" Foreground="{StaticResource FgSecondary}"
+                                           Width="80" TextAlignment="Center" Margin="0,0,12,0"/>
+                                <TextBlock Text="Off" FontSize="11" Foreground="{StaticResource FgSecondary}"
+                                           Width="80" TextAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Preset name -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="Preset"/>
+                            <TextBox x:Name="NameBox" Style="{StaticResource DarkTextBox}"
+                                     TextChanged="OnNameChanged"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Labels -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="Labels"/>
+                            <TextBox x:Name="OnTextBox" Style="{StaticResource DarkTextBox}" Margin="0,0,0,6"
+                                     TextChanged="OnOnTextChanged"/>
+                            <TextBox x:Name="OffTextBox" Style="{StaticResource DarkTextBox}"
+                                     TextChanged="OnOffTextChanged"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Colors -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="Colors"/>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Badge on" Style="{StaticResource FieldLabel}"/>
+                                <Button x:Name="OnColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
+                                        Click="OnOnColorClick"/>
+                                <Popup x:Name="OnColorPopup" StaysOpen="False" Placement="Left"
+                                       PlacementTarget="{Binding ElementName=OnColorBtn}" AllowsTransparency="True">
+                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                            BorderThickness="1" BorderBrush="#555">
+                                        <WrapPanel x:Name="OnColorPalette" Width="168"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Text on" Style="{StaticResource FieldLabel}"/>
+                                <Button x:Name="OnTextColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
+                                        Click="OnOnTextColorClick"/>
+                                <Popup x:Name="OnTextColorPopup" StaysOpen="False" Placement="Left"
+                                       PlacementTarget="{Binding ElementName=OnTextColorBtn}" AllowsTransparency="True">
+                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                            BorderThickness="1" BorderBrush="#555">
+                                        <WrapPanel x:Name="OnTextColorPalette" Width="168"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Badge off" Style="{StaticResource FieldLabel}"/>
+                                <Button x:Name="OffColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
+                                        Click="OnOffColorClick"/>
+                                <Popup x:Name="OffColorPopup" StaysOpen="False" Placement="Left"
+                                       PlacementTarget="{Binding ElementName=OffColorBtn}" AllowsTransparency="True">
+                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                            BorderThickness="1" BorderBrush="#555">
+                                        <WrapPanel x:Name="OffColorPalette" Width="168"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Text off" Style="{StaticResource FieldLabel}"/>
+                                <Button x:Name="OffTextColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
+                                        Click="OnOffTextColorClick"/>
+                                <Popup x:Name="OffTextColorPopup" StaysOpen="False" Placement="Left"
+                                       PlacementTarget="{Binding ElementName=OffTextColorBtn}" AllowsTransparency="True">
+                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                            BorderThickness="1" BorderBrush="#555">
+                                        <WrapPanel x:Name="OffTextColorPalette" Width="168"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Actions -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                        <Button Content="Use This Preset" Style="{StaticResource SmallBtn}"
+                                Click="OnUsePreset" Margin="0,0,6,0"/>
+                        <Button Content="Duplicate" Style="{StaticResource SmallBtn}"
+                                Click="OnDuplicatePreset" Margin="0,0,6,0"/>
+                        <Button Content="Delete" Style="{StaticResource SmallBtn}"
+                                Click="OnRemovePreset"/>
+                    </StackPanel>
+
+                    <Button Content="Reset all presets to defaults" Style="{StaticResource SmallBtn}"
+                            HorizontalAlignment="Center" Click="OnResetPresets" Margin="0,4,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ========== ABOUT TAB ========== -->
+        <ScrollViewer x:Name="AboutPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Width="400" HorizontalAlignment="Center" Margin="0,30,0,30">
+                <!-- Logo area -->
+                <TextBlock Text="hushBar" FontSize="32" FontWeight="Bold" Foreground="{StaticResource FgPrimary}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Mute your microphone from the system tray." FontSize="13"
+                           Foreground="{StaticResource FgSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                <TextBlock Text="Version 1.0" FontSize="12" Foreground="{StaticResource FgSecondary}"
+                           HorizontalAlignment="Center" Margin="0,2,0,20"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                    <TextBlock Text="Created with" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                               VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Text="&#x2764;" FontSize="13" Foreground="#FF4060" VerticalAlignment="Center"
+                               Margin="0,0,4,0"/>
+                    <TextBlock Text="by" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                               VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <Button Content="Arda Canbakis" Style="{StaticResource LinkBtn}"
+                            Click="OnOpenWebsite"/>
+                    <TextBlock Text=" &#x00A9; 2026" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Border Background="{StaticResource CardBorder}" Height="1" Margin="40,20"/>
+
+                <TextBlock TextAlignment="Center" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                           Margin="0,0,0,20" TextWrapping="Wrap">
+                    This app is free for everyone, and I plan to keep it that way.
+                    If HushBar made your day a little easier and you'd like to support future updates,
+                    a small donation would mean a lot.
+                </TextBlock>
+
+                <!-- Buy Me a Coffee -->
+                <Button x:Name="CoffeeBtn" Click="OnBuyMeACoffee" HorizontalAlignment="Center"
+                        Cursor="Hand" Margin="0,0,0,24">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" CornerRadius="8" Background="#FFDD00" Padding="20,10">
+                                <TextBlock Text="&#x2615; Buy me a coffee" FontSize="15" FontWeight="Bold"
+                                           Foreground="#333"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#FFE533"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <TextBlock Text="Check my links" FontSize="12" Foreground="{StaticResource FgSecondary}"
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                <!-- Social links -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="&#x1F310;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenWebsite" Margin="4" Padding="8,4" ToolTip="Website"/>
+                    <Button Content="&#x1F431;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenGitHub" Margin="4" Padding="8,4" ToolTip="GitHub"/>
+                    <Button Content="&#x1F4F7;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenInstagram" Margin="4" Padding="8,4" ToolTip="Instagram"/>
+                    <Button Content="&#x25B6;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenYouTube" Margin="4" Padding="8,4" ToolTip="YouTube"/>
+                    <Button Content="&#x1F3B5;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenSpotify" Margin="4" Padding="8,4" ToolTip="Spotify"/>
+                    <Button Content="&#x1F4BC;" FontSize="20" Style="{StaticResource SmallBtn}"
+                            Click="OnOpenLinkedIn" Margin="4" Padding="8,4" ToolTip="LinkedIn"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
 </Window>

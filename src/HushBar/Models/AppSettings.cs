@@ -3,26 +3,19 @@ using System.Text.Json;
 
 namespace HushBar.Models;
 
-/// <summary>
-/// Settings persisted as JSON in %APPDATA%\HushBar\settings.json.
-/// Mirrors the macOS AppSettings (preset list + selected preset + behavior flags).
-/// </summary>
 public sealed class AppSettings
 {
-    public List<BarPreset> Presets { get; set; } = new()
-    {
-        new BarPreset { Name = "On Air",   OnText = "Live", OffText = "Muted" },
-        new BarPreset { Name = "Minimal",  OnText = "On",   OffText = "Off" },
-    };
+    public List<BarPreset> Presets { get; set; } = BarPreset.Defaults();
 
     public Guid SelectedPresetId { get; set; }
     public bool PlaySoundOnToggle { get; set; } = true;
 
+    public uint HotKeyModifiers { get; set; } = 0x4006; // Ctrl+Shift+NoRepeat
+    public uint HotKeyVk { get; set; } = 0x4D;          // M
+
     [System.Text.Json.Serialization.JsonIgnore]
     public BarPreset SelectedPreset =>
         Presets.FirstOrDefault(p => p.Id == SelectedPresetId) ?? Presets[0];
-
-    // MARK: - Persistence
 
     private static string FilePath
     {

@@ -8,10 +8,6 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace HushBar;
 
-/// <summary>
-/// Tray-only WPF agent. No main window opens at launch; everything is driven from
-/// the NotifyIcon. Single-instance enforced via a named Mutex.
-/// </summary>
 public partial class App : Application
 {
     private Mutex? _singleInstance;
@@ -40,7 +36,7 @@ public partial class App : Application
         BuildTray();
         RefreshTray();
 
-        _hotKey = new HotKeyManager(() => _mic.Toggle());
+        _hotKey = new HotKeyManager(() => _mic.Toggle(), _settings.HotKeyModifiers, _settings.HotKeyVk);
     }
 
     private void BuildTray()
@@ -69,7 +65,6 @@ public partial class App : Application
             ContextMenuStrip = menu,
             Text = "HushBar",
         };
-        // Left-click toggles; right-click shows the menu (handled by ContextMenuStrip).
         _tray.MouseClick += (_, args) =>
         {
             if (args.Button == MouseButtons.Left) _mic?.Toggle();
@@ -97,7 +92,7 @@ public partial class App : Application
     {
         if (_prefs is null)
         {
-            _prefs = new PreferencesWindow(_settings, _mic);
+            _prefs = new PreferencesWindow(_settings, _mic, _hotKey, () => RefreshTray());
             _prefs.Closed += (_, _) => { _settings.Save(); RefreshTray(); _prefs = null; };
         }
         _prefs.Show();
