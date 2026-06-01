@@ -1,0 +1,27 @@
+<Window x:Class="HushBar.PreferencesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HushBar Preferences"
+        Width="420" Height="360"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="HushBar" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="1" Margin="0,4,0,16" Foreground="Gray"
+                   Text="Mute your microphone globally from the tray." />
+
+        <!-- TODO Phase 4: preset list + editor (name, colors, on/off labels),
+             sound toggle, hotkey rebind, mic status. Bind to the AppSettings
+             instance passed into the constructor. -->
+        <StackPanel Grid.Row="2">
+            <CheckBox x:Name="SoundCheck" Content="Play sound on toggle" Margin="0,8" />
+            <TextBlock Text="Preset editor coming in Phase 4." Foreground="Gray" Margin="0,12,0,0" />
+        </StackPanel>
+    </Grid>
+</Window>

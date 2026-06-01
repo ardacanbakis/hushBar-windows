@@ -1,0 +1,23 @@
+## .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userprefs
+
+## Build output
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+publish/
+
+## Rider
+.idea/
+
+## Packaging
+*.msix
+*.msi
+*.appx
+*.cer
+*.pfx
