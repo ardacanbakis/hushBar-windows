@@ -3,6 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using HushBar.Models;
 using HushBar.Services;
+using WpfButton = System.Windows.Controls.Button;
+using WpfBrushes = System.Windows.Media.Brushes;
+using WpfColor = System.Windows.Media.Color;
 using DrawingColor = System.Drawing.Color;
 
 namespace HushBar;
@@ -15,18 +18,18 @@ public partial class PreferencesWindow : Window
 
     private static readonly DrawingColor[] Palette =
     {
-        DrawingColor.FromArgb(255, 52, 199, 89),   // green
-        DrawingColor.FromArgb(255, 0, 122, 255),    // blue
-        DrawingColor.FromArgb(255, 255, 59, 48),    // red
-        DrawingColor.FromArgb(255, 255, 149, 0),    // orange
-        DrawingColor.FromArgb(255, 175, 82, 222),   // purple
-        DrawingColor.FromArgb(255, 255, 204, 0),    // yellow
-        DrawingColor.FromArgb(255, 90, 200, 250),   // cyan
-        DrawingColor.FromArgb(255, 255, 45, 85),    // pink
-        DrawingColor.FromArgb(255, 88, 86, 214),    // indigo
-        DrawingColor.FromArgb(255, 0, 199, 190),    // teal
-        DrawingColor.FromArgb(255, 142, 142, 147),  // gray
-        DrawingColor.FromArgb(255, 72, 72, 74),     // dark gray
+        DrawingColor.FromArgb(255, 52, 199, 89),
+        DrawingColor.FromArgb(255, 0, 122, 255),
+        DrawingColor.FromArgb(255, 255, 59, 48),
+        DrawingColor.FromArgb(255, 255, 149, 0),
+        DrawingColor.FromArgb(255, 175, 82, 222),
+        DrawingColor.FromArgb(255, 255, 204, 0),
+        DrawingColor.FromArgb(255, 90, 200, 250),
+        DrawingColor.FromArgb(255, 255, 45, 85),
+        DrawingColor.FromArgb(255, 88, 86, 214),
+        DrawingColor.FromArgb(255, 0, 199, 190),
+        DrawingColor.FromArgb(255, 142, 142, 147),
+        DrawingColor.FromArgb(255, 72, 72, 74),
     };
 
     public PreferencesWindow(AppSettings settings, MicMuteService? mic = null)
@@ -121,7 +124,7 @@ public partial class PreferencesWindow : Window
     {
         foreach (var color in Palette)
         {
-            var btn = new Button
+            var btn = new WpfButton
             {
                 Background = ToBrush(color),
                 Style = (Style)FindResource("PopupColor"),
@@ -179,15 +182,15 @@ public partial class PreferencesWindow : Window
     {
         if (_mic is null)
         {
-            MicDot.Fill = Brushes.Gray;
+            MicDot.Fill = WpfBrushes.Gray;
             MicStatusText.Text = "Mic service unavailable";
             return;
         }
         bool muted = _mic.IsMuted;
-        MicDot.Fill = muted ? Brushes.Red : Brushes.LimeGreen;
+        MicDot.Fill = muted ? WpfBrushes.Red : WpfBrushes.LimeGreen;
         MicStatusText.Text = muted ? "Muted" : "Live";
     }
 
     private static SolidColorBrush ToBrush(DrawingColor c) =>
-        new(Color.FromArgb(c.A, c.R, c.G, c.B));
+        new(WpfColor.FromArgb(c.A, c.R, c.G, c.B));
 }
