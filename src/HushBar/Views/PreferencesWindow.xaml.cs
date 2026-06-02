@@ -5,8 +5,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using HushBar.Models;
 using HushBar.Services;
-using Microsoft.Win32;
 using WpfButton = System.Windows.Controls.Button;
+using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using DrawingColor = System.Drawing.Color;
@@ -371,7 +371,7 @@ public partial class PreferencesWindow : Window
 
     private void OnBrowseCustomIcon(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFileDialog
+        var dlg = new WpfOpenFileDialog
         {
             Title  = "Select custom icon",
             Filter = "Image files (*.ico;*.png;*.bmp)|*.ico;*.png;*.bmp|All files (*.*)|*.*",
