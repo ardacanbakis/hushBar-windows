@@ -13,6 +13,10 @@ public sealed class AppSettings
     public uint HotKeyModifiers { get; set; } = 0x4006; // Ctrl+Shift+NoRepeat
     public uint HotKeyVk { get; set; } = 0x4D;          // M
 
+    public string IconStyle { get; set; } = "Capsule";
+    public string MuteStyle { get; set; } = "DiagonalSlash";
+    public string? CustomIconPath { get; set; }
+
     [System.Text.Json.Serialization.JsonIgnore]
     public BarPreset SelectedPreset =>
         Presets.FirstOrDefault(p => p.Id == SelectedPresetId) ?? Presets[0];

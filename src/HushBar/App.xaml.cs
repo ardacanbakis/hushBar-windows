@@ -77,7 +77,9 @@ public partial class App : Application
         var preset = _settings.SelectedPreset;
 
         var oldIcon = _tray.Icon;
-        _tray.Icon = TrayIconRenderer.Render(_mic.IsMuted, preset.OnColor, preset.OffColor);
+        _tray.Icon = TrayIconRenderer.Render(
+            _mic.IsMuted, preset.OnColor, preset.OffColor,
+            _settings.IconStyle, _settings.MuteStyle, _settings.CustomIconPath);
         oldIcon?.Dispose();
 
         _tray.Text = preset.Tooltip(_mic.IsMuted);

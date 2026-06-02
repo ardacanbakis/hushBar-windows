@@ -7,51 +7,123 @@
         ResizeMode="CanMinimize"
         Background="#1E1E1E">
     <Window.Resources>
-        <SolidColorBrush x:Key="CardBg" Color="#2D2D2D"/>
-        <SolidColorBrush x:Key="CardBorder" Color="#3E3E3E"/>
-        <SolidColorBrush x:Key="FgPrimary" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="CardBg"      Color="#2D2D2D"/>
+        <SolidColorBrush x:Key="CardBorder"  Color="#3E3E3E"/>
+        <SolidColorBrush x:Key="FgPrimary"   Color="#E0E0E0"/>
         <SolidColorBrush x:Key="FgSecondary" Color="#999"/>
-        <SolidColorBrush x:Key="Accent" Color="#0A84FF"/>
+        <SolidColorBrush x:Key="Accent"      Color="#0A84FF"/>
 
+        <!-- ── Tab button ── -->
+        <Style x:Key="TabBtn" TargetType="RadioButton">
+            <Setter Property="Cursor"  Value="Hand"/>
+            <Setter Property="Padding" Value="18,6"/>
+            <Setter Property="Margin"  Value="2,0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" CornerRadius="6" Background="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock x:Name="Txt" Text="{TemplateBinding Content}"
+                                       FontSize="13" FontWeight="Medium"
+                                       Foreground="#888"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd"  Property="Background" Value="#0A84FF"/>
+                                <Setter TargetName="Txt" Property="Foreground" Value="White"/>
+                                <Setter TargetName="Txt" Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsChecked"   Value="False"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd"  Property="Background" Value="#333"/>
+                                <Setter TargetName="Txt" Property="Foreground" Value="#CCC"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Labels ── -->
         <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="{StaticResource FgSecondary}"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="FontSize"    Value="10"/>
+            <Setter Property="Foreground"  Value="{StaticResource FgSecondary}"/>
+            <Setter Property="FontWeight"  Value="SemiBold"/>
+            <Setter Property="Margin"      Value="0,0,0,4"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize"   Value="13"/>
             <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+
+        <!-- ── TextBox ── -->
         <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Height"                Value="28"/>
+            <Setter Property="Background"            Value="#383838"/>
+            <Setter Property="Foreground"            Value="{StaticResource FgPrimary}"/>
+            <Setter Property="BorderBrush"           Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness"       Value="1"/>
+            <Setter Property="CaretBrush"            Value="White"/>
+            <Setter Property="SelectionBrush"        Value="#0A84FF"/>
+            <Setter Property="FocusVisualStyle"      Value="{x:Null}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Background" Value="#383838"/>
-            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="6,3"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused"    Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#0A84FF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#666"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <!-- ── Card ── -->
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBg}"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
-            <Setter Property="Padding" Value="16"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Background"       Value="{StaticResource CardBg}"/>
+            <Setter Property="CornerRadius"     Value="8"/>
+            <Setter Property="BorderThickness"  Value="1"/>
+            <Setter Property="BorderBrush"      Value="{StaticResource CardBorder}"/>
+            <Setter Property="Padding"          Value="14"/>
+            <Setter Property="Margin"           Value="0,0,0,10"/>
         </Style>
+        <Style x:Key="CompactCard" TargetType="Border">
+            <Setter Property="Background"       Value="{StaticResource CardBg}"/>
+            <Setter Property="CornerRadius"     Value="6"/>
+            <Setter Property="BorderThickness"  Value="1"/>
+            <Setter Property="BorderBrush"      Value="{StaticResource CardBorder}"/>
+            <Setter Property="Padding"          Value="10,8"/>
+            <Setter Property="Margin"           Value="0,0,0,6"/>
+        </Style>
+
+        <!-- ── Color swatch button ── -->
         <Style x:Key="ColorSwatch" TargetType="Button">
-            <Setter Property="Width" Value="48"/>
-            <Setter Property="Height" Value="24"/>
+            <Setter Property="Width"  Value="44"/>
+            <Setter Property="Height" Value="22"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" CornerRadius="4"
-                                BorderThickness="1.5" BorderBrush="#555"
-                                Background="{TemplateBinding Background}"/>
+                        <Border x:Name="Bd" CornerRadius="4" BorderThickness="1.5"
+                                BorderBrush="#555" Background="{TemplateBinding Background}"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd" Property="BorderBrush" Value="#AAA"/>
@@ -61,17 +133,18 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ── Palette pop-up swatch ── -->
         <Style x:Key="PopupColor" TargetType="Button">
-            <Setter Property="Width" Value="24"/>
+            <Setter Property="Width"  Value="24"/>
             <Setter Property="Height" Value="24"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" CornerRadius="3"
-                                BorderThickness="1.5" BorderBrush="Transparent"
-                                Background="{TemplateBinding Background}"/>
+                        <Border x:Name="Bd" CornerRadius="3" BorderThickness="1.5"
+                                BorderBrush="Transparent" Background="{TemplateBinding Background}"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd" Property="BorderBrush" Value="White"/>
@@ -81,27 +154,86 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ── CheckBox ── -->
         <Style x:Key="DarkCheck" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
-            <Setter Property="Margin" Value="0,4"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground"       Value="{StaticResource FgPrimary}"/>
+            <Setter Property="FontSize"         Value="13"/>
+            <Setter Property="Margin"           Value="0,5"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="Box" Width="16" Height="16" CornerRadius="3"
+                                    Background="#383838" BorderBrush="#4E4E4E" BorderThickness="1.5"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="Mark" Text="✓" FontSize="11" FontWeight="Bold"
+                                           Foreground="#0A84FF" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Mark" Property="Visibility"  Value="Visible"/>
+                                <Setter TargetName="Box"  Property="BorderBrush" Value="#0A84FF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <!-- ── SmallBtn ── -->
         <Style x:Key="SmallBtn" TargetType="Button">
-            <Setter Property="Background" Value="#383838"/>
-            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,4"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Background"       Value="#383838"/>
+            <Setter Property="Foreground"       Value="{StaticResource FgPrimary}"/>
+            <Setter Property="BorderBrush"      Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness"  Value="1"/>
+            <Setter Property="Padding"          Value="10,4"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="FontSize"         Value="12"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"  Value="#464646"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#666"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2E2E2E"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="#2A2A2A"/>
+                                <Setter Property="Foreground" Value="#555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <!-- ── LinkBtn ── -->
         <Style x:Key="LinkBtn" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="Foreground"      Value="{StaticResource Accent}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="Padding"         Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -112,336 +244,435 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ── Dark ComboBox ── -->
+        <Style x:Key="DarkComboBox" TargetType="ComboBox">
+            <Setter Property="Height"           Value="28"/>
+            <Setter Property="Foreground"       Value="{StaticResource FgPrimary}"/>
+            <Setter Property="Background"       Value="#383838"/>
+            <Setter Property="BorderBrush"      Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness"  Value="1"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4" Cursor="Hand"/>
+                            <ContentPresenter IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              Margin="8,3,24,3" VerticalAlignment="Center"/>
+                            <TextBlock Text="▾" Foreground="#777" FontSize="10"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                                       Margin="0,0,8,0" IsHitTestVisible="False"/>
+                            <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Placement="Bottom"
+                                   MinWidth="{TemplateBinding ActualWidth}">
+                                <Border Background="#2D2D2D" BorderBrush="#555" BorderThickness="1"
+                                        CornerRadius="4" Margin="0,2,0,0">
+                                    <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"    Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#666"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#0A84FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background"    Value="#2D2D2D"/>
+                        <Setter Property="Foreground"    Value="#E0E0E0"/>
+                        <Setter Property="Padding"       Value="8,5"/>
+                        <Setter Property="FontSize"      Value="12"/>
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#383838"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected"  Value="True">
+                                <Setter Property="Background" Value="#0A84FF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <DockPanel>
-        <!-- Tab bar -->
-        <Border DockPanel.Dock="Top" Background="#252525" BorderBrush="#3E3E3E" BorderThickness="0,0,0,1">
+        <!-- ── Tab bar ── -->
+        <Border DockPanel.Dock="Top" Background="#252525"
+                BorderBrush="#3E3E3E" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
                 <RadioButton x:Name="TabGeneral" Content="General" GroupName="Tabs"
-                             IsChecked="True" Click="OnTabChanged"
-                             Foreground="{StaticResource FgPrimary}" FontSize="13"
-                             Margin="0,0,4,0" Padding="14,6"
-                             Style="{StaticResource {x:Type ToggleButton}}"/>
-                <RadioButton x:Name="TabStyle" Content="Style" GroupName="Tabs"
-                             Click="OnTabChanged"
-                             Foreground="{StaticResource FgPrimary}" FontSize="13"
-                             Margin="0,0,4,0" Padding="14,6"
-                             Style="{StaticResource {x:Type ToggleButton}}"/>
-                <RadioButton x:Name="TabAbout" Content="About" GroupName="Tabs"
-                             Click="OnTabChanged"
-                             Foreground="{StaticResource FgPrimary}" FontSize="13"
-                             Padding="14,6"
-                             Style="{StaticResource {x:Type ToggleButton}}"/>
+                             IsChecked="True" Click="OnTabChanged" Style="{StaticResource TabBtn}"/>
+                <RadioButton x:Name="TabStyle"   Content="Style"   GroupName="Tabs"
+                             Click="OnTabChanged" Style="{StaticResource TabBtn}"/>
+                <RadioButton x:Name="TabAbout"   Content="About"   GroupName="Tabs"
+                             Click="OnTabChanged" Style="{StaticResource TabBtn}"/>
             </StackPanel>
         </Border>
 
-        <!-- ========== GENERAL TAB ========== -->
-        <ScrollViewer x:Name="GeneralPanel" VerticalScrollBarVisibility="Auto" Padding="24,16">
-            <StackPanel Width="400" HorizontalAlignment="Center">
-                <!-- Current Style preview -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="Current Style"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                            <Border x:Name="GenPreviewOnBorder" CornerRadius="6" Padding="14,6" Margin="0,0,8,0">
-                                <TextBlock x:Name="GenPreviewOnText" FontSize="13" FontWeight="Bold"/>
-                            </Border>
-                            <Border x:Name="GenPreviewOffBorder" CornerRadius="6" Padding="14,6" Margin="0,0,12,0">
-                                <TextBlock x:Name="GenPreviewOffText" FontSize="13" FontWeight="Bold"/>
-                            </Border>
-                            <TextBlock x:Name="GenPreviewName" FontSize="13" VerticalAlignment="Center"
-                                       Foreground="{StaticResource FgPrimary}"/>
+        <!-- ── Content area: shared Grid ── -->
+        <Grid>
+
+            <!-- ════════════ GENERAL TAB ════════════ -->
+            <Grid x:Name="GeneralPanel">
+                <StackPanel Width="430" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                    <!-- Current style preview -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="CURRENT STYLE"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Border x:Name="GenPreviewOnBorder"  CornerRadius="6" Padding="14,6" Margin="0,0,8,0">
+                                    <TextBlock x:Name="GenPreviewOnText"  FontSize="13" FontWeight="Bold"/>
+                                </Border>
+                                <Border x:Name="GenPreviewOffBorder" CornerRadius="6" Padding="14,6" Margin="0,0,12,0">
+                                    <TextBlock x:Name="GenPreviewOffText" FontSize="13" FontWeight="Bold"/>
+                                </Border>
+                                <TextBlock x:Name="GenPreviewName" FontSize="13" VerticalAlignment="Center"
+                                           Foreground="{StaticResource FgPrimary}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Global shortcut -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="GLOBAL SHORTCUT"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                           Text="Toggle mute:" Margin="0,0,12,0"/>
+                                <Border Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10,4"
+                                        BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                                    <TextBlock x:Name="HotKeyDisplay" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button x:Name="HotKeyRecordBtn" Grid.Column="2" Content="Record"
+                                        Style="{StaticResource SmallBtn}" Margin="8,0,0,0"
+                                        Click="OnHotKeyRecord"/>
+                            </Grid>
+                            <TextBlock x:Name="HotKeyHint" FontSize="11"
+                                       Foreground="{StaticResource FgSecondary}"
+                                       Margin="0,6,0,0" Visibility="Collapsed"
+                                       Text="Press a combo (e.g. Ctrl+Shift+M), then click Stop."/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Toggles -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <CheckBox x:Name="StartupCheck" Content="Launch HushBar at login"
+                                      Style="{StaticResource DarkCheck}"/>
+                            <CheckBox x:Name="SoundCheck"   Content="Play sound on toggle"
+                                      Style="{StaticResource DarkCheck}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Mic status -->
+                    <Border Style="{StaticResource Card}" Margin="0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="MICROPHONE"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Default microphone" FontSize="13"
+                                           Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="MicStatusText" FontSize="13" FontWeight="SemiBold"
+                                           Margin="16,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- ════════════ STYLE TAB ════════════ -->
+            <Grid x:Name="StylePanel" Visibility="Collapsed" Margin="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="196"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: preset list -->
+                <DockPanel Grid.Column="0" Margin="0,0,10,0">
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,6,0,0">
+                        <Button Content="+" Width="30" Height="24" Click="OnAddPreset"
+                                Style="{StaticResource SmallBtn}" FontSize="15" FontWeight="Bold" Margin="0,0,4,0"/>
+                        <Button Content="−" Width="30" Height="24" Click="OnRemovePreset"
+                                Style="{StaticResource SmallBtn}" FontSize="15" FontWeight="Bold"/>
+                    </StackPanel>
+                    <ListBox x:Name="PresetList" SelectionChanged="OnPresetSelected"
+                             Background="#252525" Foreground="{StaticResource FgPrimary}"
+                             BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2">
+                                    <Border CornerRadius="3" Padding="5,2" Margin="0,0,6,0" Background="Gray">
+                                        <TextBlock Text="{Binding OnText}" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"
+                                               Foreground="#E0E0E0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+
+                <!-- Right: Grid with preset editor + global icon settings -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Preset editor (Row 0) -->
+                    <StackPanel x:Name="EditorPanel" Grid.Row="0">
+
+                        <!-- Preview -->
+                        <Border Style="{StaticResource CompactCard}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Border x:Name="PreviewOnBorder"  CornerRadius="6" Padding="14,6" Margin="0,0,10,0">
+                                    <TextBlock x:Name="PreviewOnText"  FontSize="13" FontWeight="Bold"/>
+                                </Border>
+                                <Border x:Name="PreviewOffBorder" CornerRadius="6" Padding="14,6">
+                                    <TextBlock x:Name="PreviewOffText" FontSize="13" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Name + Labels -->
+                        <Border Style="{StaticResource CompactCard}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionLabel}" Text="PRESET NAME"/>
+                                <TextBox x:Name="NameBox" Style="{StaticResource DarkTextBox}"
+                                         Margin="0,0,0,8" TextChanged="OnNameChanged"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Style="{StaticResource SectionLabel}" Text="ON TEXT"/>
+                                        <TextBox x:Name="OnTextBox" Style="{StaticResource DarkTextBox}"
+                                                 TextChanged="OnOnTextChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Style="{StaticResource SectionLabel}" Text="OFF TEXT"/>
+                                        <TextBox x:Name="OffTextBox" Style="{StaticResource DarkTextBox}"
+                                                 TextChanged="OnOffTextChanged"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Colors 2x2 -->
+                        <Border Style="{StaticResource CompactCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource SectionLabel}" Text="BADGE ON"/>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                                    <Button x:Name="OnColorBtn" Style="{StaticResource ColorSwatch}" Click="OnOnColorClick"/>
+                                    <Popup x:Name="OnColorPopup" StaysOpen="False" Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=OnColorBtn}" AllowsTransparency="True">
+                                        <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                                BorderThickness="1" BorderBrush="#555">
+                                            <WrapPanel x:Name="OnColorPalette" Width="168"/>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource SectionLabel}" Text="TEXT ON"/>
+                                <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
+                                    <Button x:Name="OnTextColorBtn" Style="{StaticResource ColorSwatch}" Click="OnOnTextColorClick"/>
+                                    <Popup x:Name="OnTextColorPopup" StaysOpen="False" Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=OnTextColorBtn}" AllowsTransparency="True">
+                                        <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                                BorderThickness="1" BorderBrush="#555">
+                                            <WrapPanel x:Name="OnTextColorPalette" Width="168"/>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource SectionLabel}" Text="BADGE OFF"/>
+                                <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
+                                    <Button x:Name="OffColorBtn" Style="{StaticResource ColorSwatch}" Click="OnOffColorClick"/>
+                                    <Popup x:Name="OffColorPopup" StaysOpen="False" Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=OffColorBtn}" AllowsTransparency="True">
+                                        <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                                BorderThickness="1" BorderBrush="#555">
+                                            <WrapPanel x:Name="OffColorPalette" Width="168"/>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource SectionLabel}" Text="TEXT OFF"/>
+                                <StackPanel Grid.Row="4" Grid.Column="2" Orientation="Horizontal">
+                                    <Button x:Name="OffTextColorBtn" Style="{StaticResource ColorSwatch}" Click="OnOffTextColorClick"/>
+                                    <Popup x:Name="OffTextColorPopup" StaysOpen="False" Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=OffTextColorBtn}" AllowsTransparency="True">
+                                        <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
+                                                BorderThickness="1" BorderBrush="#555">
+                                            <WrapPanel x:Name="OffTextColorPalette" Width="168"/>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Preset actions -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,4">
+                            <Button Content="Use This"      Style="{StaticResource SmallBtn}" Click="OnUsePreset"       Margin="0,0,5,0"/>
+                            <Button Content="Duplicate"     Style="{StaticResource SmallBtn}" Click="OnDuplicatePreset" Margin="0,0,5,0"/>
+                            <Button Content="Reset Defaults" Style="{StaticResource SmallBtn}" Click="OnResetPresets"/>
                         </StackPanel>
                     </StackPanel>
-                </Border>
 
-                <!-- Global Shortcut -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="Global Shortcut"/>
+                    <!-- Icon + Mute style (Row 1, global settings) -->
+                    <Border Grid.Row="1" Style="{StaticResource CompactCard}" Margin="0,2,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}" Text="Toggle mute:"
-                                       Margin="0,0,12,0"/>
-                            <Border Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10,4"
-                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
-                                <TextBlock x:Name="HotKeyDisplay" FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
-                            </Border>
-                            <Button x:Name="HotKeyRecordBtn" Grid.Column="2" Content="Record"
-                                    Style="{StaticResource SmallBtn}" Margin="8,0,0,0"
-                                    Click="OnHotKeyRecord"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource SectionLabel}" Text="ICON STYLE"/>
+                            <ComboBox  Grid.Row="1" Grid.Column="0" x:Name="IconStyleBox" Style="{StaticResource DarkComboBox}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource SectionLabel}" Text="MUTE INDICATOR"/>
+                            <ComboBox  Grid.Row="1" Grid.Column="2" x:Name="MuteStyleBox" Style="{StaticResource DarkComboBox}"/>
                         </Grid>
-                        <TextBlock x:Name="HotKeyHint" FontSize="11" Foreground="{StaticResource FgSecondary}"
-                                   Margin="0,6,0,0" Visibility="Collapsed"
-                                   Text="Press a key combination, then click Stop."/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Settings -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <CheckBox x:Name="StartupCheck" Content="Launch HushBar at login"
-                                  Style="{StaticResource DarkCheck}"/>
-                        <CheckBox x:Name="SoundCheck" Content="Play sound on toggle"
-                                  Style="{StaticResource DarkCheck}"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Microphone -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource SectionLabel}" Text="Microphone"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Microphone" FontSize="13" Foreground="{StaticResource FgPrimary}"
-                                       VerticalAlignment="Center"/>
-                            <TextBlock x:Name="MicStatusText" FontSize="13" FontWeight="SemiBold"
-                                       Margin="16,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
-
-        <!-- ========== STYLE TAB ========== -->
-        <Grid x:Name="StylePanel" Visibility="Collapsed" Margin="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left: preset list -->
-            <DockPanel Grid.Column="0" Margin="0,0,12,0">
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
-                    <Button Content="+" Width="32" Height="26" Click="OnAddPreset"
-                            Style="{StaticResource SmallBtn}" FontSize="16" FontWeight="Bold" Margin="0,0,4,0"/>
-                    <Button Content="&#x2212;" Width="32" Height="26" Click="OnRemovePreset"
-                            Style="{StaticResource SmallBtn}" FontSize="16" FontWeight="Bold"/>
-                </StackPanel>
-                <ListBox x:Name="PresetList" SelectionChanged="OnPresetSelected"
-                         Background="#252525" Foreground="{StaticResource FgPrimary}"
-                         BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="2">
-                                <Border x:Name="PillPreview" CornerRadius="4" Padding="8,2" Margin="0,0,8,0"
-                                        Background="Gray">
-                                    <TextBlock Text="{Binding OnText}" FontSize="11" FontWeight="Bold"
-                                               Foreground="White"/>
-                                </Border>
-                                <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"
-                                           Foreground="#E0E0E0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </DockPanel>
-
-            <!-- Right: editor -->
-            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="EditorPanel">
-                    <!-- Preview -->
-                    <Border Style="{StaticResource Card}" Padding="20">
-                        <StackPanel HorizontalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
-                                <Border x:Name="PreviewOnBorder" CornerRadius="8" Padding="18,8" Margin="0,0,12,0">
-                                    <TextBlock x:Name="PreviewOnText" FontSize="15" FontWeight="Bold"/>
-                                </Border>
-                                <Border x:Name="PreviewOffBorder" CornerRadius="8" Padding="18,8">
-                                    <TextBlock x:Name="PreviewOffText" FontSize="15" FontWeight="Bold"/>
-                                </Border>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                                <TextBlock Text="On" FontSize="11" Foreground="{StaticResource FgSecondary}"
-                                           Width="80" TextAlignment="Center" Margin="0,0,12,0"/>
-                                <TextBlock Text="Off" FontSize="11" Foreground="{StaticResource FgSecondary}"
-                                           Width="80" TextAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
                     </Border>
 
-                    <!-- Preset name -->
-                    <Border Style="{StaticResource Card}">
+                    <!-- Custom icon import (Row 2, shown only for Custom style) -->
+                    <Border x:Name="CustomIconPanel" Grid.Row="2"
+                            Style="{StaticResource CompactCard}" Visibility="Collapsed" Margin="0">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource SectionLabel}" Text="Preset"/>
-                            <TextBox x:Name="NameBox" Style="{StaticResource DarkTextBox}"
-                                     TextChanged="OnNameChanged"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Labels -->
-                    <Border Style="{StaticResource Card}">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionLabel}" Text="Labels"/>
-                            <TextBox x:Name="OnTextBox" Style="{StaticResource DarkTextBox}" Margin="0,0,0,6"
-                                     TextChanged="OnOnTextChanged"/>
-                            <TextBox x:Name="OffTextBox" Style="{StaticResource DarkTextBox}"
-                                     TextChanged="OnOffTextChanged"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Colors -->
-                    <Border Style="{StaticResource Card}">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionLabel}" Text="Colors"/>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Badge on" Style="{StaticResource FieldLabel}"/>
-                                <Button x:Name="OnColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOnColorClick"/>
-                                <Popup x:Name="OnColorPopup" StaysOpen="False" Placement="Left"
-                                       PlacementTarget="{Binding ElementName=OnColorBtn}" AllowsTransparency="True">
-                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#555">
-                                        <WrapPanel x:Name="OnColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
-                            </Grid>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Text on" Style="{StaticResource FieldLabel}"/>
-                                <Button x:Name="OnTextColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOnTextColorClick"/>
-                                <Popup x:Name="OnTextColorPopup" StaysOpen="False" Placement="Left"
-                                       PlacementTarget="{Binding ElementName=OnTextColorBtn}" AllowsTransparency="True">
-                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#555">
-                                        <WrapPanel x:Name="OnTextColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
-                            </Grid>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Badge off" Style="{StaticResource FieldLabel}"/>
-                                <Button x:Name="OffColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOffColorClick"/>
-                                <Popup x:Name="OffColorPopup" StaysOpen="False" Placement="Left"
-                                       PlacementTarget="{Binding ElementName=OffColorBtn}" AllowsTransparency="True">
-                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#555">
-                                        <WrapPanel x:Name="OffColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
-                            </Grid>
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="CUSTOM ICON FILE"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Text off" Style="{StaticResource FieldLabel}"/>
-                                <Button x:Name="OffTextColorBtn" Grid.Column="1" Style="{StaticResource ColorSwatch}"
-                                        Click="OnOffTextColorClick"/>
-                                <Popup x:Name="OffTextColorPopup" StaysOpen="False" Placement="Left"
-                                       PlacementTarget="{Binding ElementName=OffTextColorBtn}" AllowsTransparency="True">
-                                    <Border Background="#2D2D2D" CornerRadius="6" Padding="6"
-                                            BorderThickness="1" BorderBrush="#555">
-                                        <WrapPanel x:Name="OffTextColorPalette" Width="168"/>
-                                    </Border>
-                                </Popup>
+                                <TextBlock x:Name="CustomIconPathText" Grid.Column="0"
+                                           Text="No file selected" FontSize="11"
+                                           Foreground="{StaticResource FgSecondary}"
+                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <Button Grid.Column="1" Content="Browse…"
+                                        Style="{StaticResource SmallBtn}" Margin="8,0,0,0"
+                                        Click="OnBrowseCustomIcon"/>
                             </Grid>
+                            <TextBlock Text="Best format: 32x32 .ico or .png with transparency"
+                                       FontSize="10" Foreground="{StaticResource FgSecondary}" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
+                </Grid>
+            </Grid>
 
-                    <!-- Actions -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
-                        <Button Content="Use This Preset" Style="{StaticResource SmallBtn}"
-                                Click="OnUsePreset" Margin="0,0,6,0"/>
-                        <Button Content="Duplicate" Style="{StaticResource SmallBtn}"
-                                Click="OnDuplicatePreset" Margin="0,0,6,0"/>
-                        <Button Content="Delete" Style="{StaticResource SmallBtn}"
-                                Click="OnRemovePreset"/>
+            <!-- ════════════ ABOUT TAB ════════════ -->
+            <ScrollViewer x:Name="AboutPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Width="400" HorizontalAlignment="Center" Margin="0,30,0,30">
+                    <TextBlock Text="hushBar" FontSize="32" FontWeight="Bold"
+                               Foreground="{StaticResource FgPrimary}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Mute your microphone from the system tray."
+                               FontSize="13" Foreground="{StaticResource FgSecondary}"
+                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    <TextBlock Text="Version 1.0" FontSize="12"
+                               Foreground="{StaticResource FgSecondary}"
+                               HorizontalAlignment="Center" Margin="0,2,0,20"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                        <TextBlock Text="Created with" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                                   VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="&#x2764;" FontSize="13" Foreground="#FF4060"
+                                   VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="by" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <Button Content="Arda Canbakis" Style="{StaticResource LinkBtn}" Click="OnOpenWebsite"/>
+                        <TextBlock Text=" © 2026" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <Button Content="Reset all presets to defaults" Style="{StaticResource SmallBtn}"
-                            HorizontalAlignment="Center" Click="OnResetPresets" Margin="0,4,0,0"/>
+                    <Border Background="{StaticResource CardBorder}" Height="1" Margin="40,20"/>
+
+                    <TextBlock TextAlignment="Center" FontSize="13" Foreground="{StaticResource FgSecondary}"
+                               Margin="0,0,0,20" TextWrapping="Wrap">
+                        This app is free for everyone, and I plan to keep it that way.
+                        If HushBar made your day a little easier and you'd like to support future updates,
+                        a small donation would mean a lot.
+                    </TextBlock>
+
+                    <Button x:Name="CoffeeBtn" Click="OnBuyMeACoffee"
+                            HorizontalAlignment="Center" Cursor="Hand" Margin="0,0,0,24">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" CornerRadius="8" Background="#FFDD00" Padding="20,10">
+                                    <TextBlock Text="☕  Buy me a coffee" FontSize="15" FontWeight="Bold" Foreground="#333"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#FFE533"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <TextBlock Text="Find me online" FontSize="12" Foreground="{StaticResource FgSecondary}"
+                               HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="🌐" FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenWebsite"   Margin="4" Padding="8,4" ToolTip="Website"/>
+                        <Button Content="🐱" FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenGitHub"    Margin="4" Padding="8,4" ToolTip="GitHub"/>
+                        <Button Content="📷" FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenInstagram" Margin="4" Padding="8,4" ToolTip="Instagram"/>
+                        <Button Content="▶"  FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenYouTube"   Margin="4" Padding="8,4" ToolTip="YouTube"/>
+                        <Button Content="🎵" FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenSpotify"   Margin="4" Padding="8,4" ToolTip="Spotify"/>
+                        <Button Content="💼" FontSize="20" Style="{StaticResource SmallBtn}"
+                                Click="OnOpenLinkedIn"  Margin="4" Padding="8,4" ToolTip="LinkedIn"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
+
         </Grid>
-
-        <!-- ========== ABOUT TAB ========== -->
-        <ScrollViewer x:Name="AboutPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
-            <StackPanel Width="400" HorizontalAlignment="Center" Margin="0,30,0,30">
-                <!-- Logo area -->
-                <TextBlock Text="hushBar" FontSize="32" FontWeight="Bold" Foreground="{StaticResource FgPrimary}"
-                           HorizontalAlignment="Center"/>
-                <TextBlock Text="Mute your microphone from the system tray." FontSize="13"
-                           Foreground="{StaticResource FgSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                <TextBlock Text="Version 1.0" FontSize="12" Foreground="{StaticResource FgSecondary}"
-                           HorizontalAlignment="Center" Margin="0,2,0,20"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                    <TextBlock Text="Created with" FontSize="13" Foreground="{StaticResource FgSecondary}"
-                               VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBlock Text="&#x2764;" FontSize="13" Foreground="#FF4060" VerticalAlignment="Center"
-                               Margin="0,0,4,0"/>
-                    <TextBlock Text="by" FontSize="13" Foreground="{StaticResource FgSecondary}"
-                               VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <Button Content="Arda Canbakis" Style="{StaticResource LinkBtn}"
-                            Click="OnOpenWebsite"/>
-                    <TextBlock Text=" &#x00A9; 2026" FontSize="13" Foreground="{StaticResource FgSecondary}"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
-
-                <Border Background="{StaticResource CardBorder}" Height="1" Margin="40,20"/>
-
-                <TextBlock TextAlignment="Center" FontSize="13" Foreground="{StaticResource FgSecondary}"
-                           Margin="0,0,0,20" TextWrapping="Wrap">
-                    This app is free for everyone, and I plan to keep it that way.
-                    If HushBar made your day a little easier and you'd like to support future updates,
-                    a small donation would mean a lot.
-                </TextBlock>
-
-                <!-- Buy Me a Coffee -->
-                <Button x:Name="CoffeeBtn" Click="OnBuyMeACoffee" HorizontalAlignment="Center"
-                        Cursor="Hand" Margin="0,0,0,24">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bd" CornerRadius="8" Background="#FFDD00" Padding="20,10">
-                                <TextBlock Text="&#x2615; Buy me a coffee" FontSize="15" FontWeight="Bold"
-                                           Foreground="#333"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bd" Property="Background" Value="#FFE533"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
-                <TextBlock Text="Check my links" FontSize="12" Foreground="{StaticResource FgSecondary}"
-                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
-
-                <!-- Social links -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="&#x1F310;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenWebsite" Margin="4" Padding="8,4" ToolTip="Website"/>
-                    <Button Content="&#x1F431;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenGitHub" Margin="4" Padding="8,4" ToolTip="GitHub"/>
-                    <Button Content="&#x1F4F7;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenInstagram" Margin="4" Padding="8,4" ToolTip="Instagram"/>
-                    <Button Content="&#x25B6;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenYouTube" Margin="4" Padding="8,4" ToolTip="YouTube"/>
-                    <Button Content="&#x1F3B5;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenSpotify" Margin="4" Padding="8,4" ToolTip="Spotify"/>
-                    <Button Content="&#x1F4BC;" FontSize="20" Style="{StaticResource SmallBtn}"
-                            Click="OnOpenLinkedIn" Margin="4" Padding="8,4" ToolTip="LinkedIn"/>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
     </DockPanel>
 </Window>
