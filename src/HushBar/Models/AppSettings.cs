@@ -13,12 +13,12 @@ public sealed class AppSettings
     public uint HotKeyModifiers { get; set; } = 0x4006; // Ctrl+Shift+NoRepeat
     public uint HotKeyVk { get; set; } = 0x4D;          // M
 
-    public string IconStyle { get; set; } = "Capsule";
+    public string IconStyle { get; set; } = "RecordDot";
     public string MuteStyle { get; set; } = "DiagonalSlash";
     public string? CustomIconPath { get; set; }
 
     public int OnColorArgb { get; set; } = System.Drawing.Color.FromArgb(255, 52, 199, 89).ToArgb();
-    public int OffColorArgb { get; set; } = System.Drawing.Color.FromArgb(255, 142, 142, 147).ToArgb();
+    public int OffColorArgb { get; set; } = System.Drawing.Color.FromArgb(255, 255, 59, 48).ToArgb();
 
     [System.Text.Json.Serialization.JsonIgnore]
     public System.Drawing.Color OnColor => System.Drawing.Color.FromArgb(OnColorArgb);

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,7 +12,6 @@ using HushBar.Models;
 using HushBar.Services;
 using WpfButton = System.Windows.Controls.Button;
 using WpfImage = System.Windows.Controls.Image;
-using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
@@ -85,19 +85,24 @@ public partial class PreferencesWindow : Window
         PopulateColorPalette(OffColorPalette, false);
         UpdateColorSwatches();
 
-        MuteStyleBox.ItemsSource  = TrayIconRenderer.MuteStyles;
-        MuteStyleBox.SelectedItem = _settings.MuteStyle;
-        MuteStyleBox.SelectionChanged += OnMuteStyleChanged;
-
-        if (!string.IsNullOrEmpty(_settings.CustomIconPath))
-            CustomIconPathText.Text = Path.GetFileName(_settings.CustomIconPath);
-        UpdateCustomIconPanelVisibility();
-
         UpdateGeneralPreview();
         UpdateMicStatus();
 
         if (_mic is not null)
             _mic.MuteChanged += _ => Dispatcher.Invoke(UpdateMicStatus);
+
+        Loaded += (_, _) => EnableDarkTitleBar();
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    private void EnableDarkTitleBar()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        int value = 1;
+        DwmSetWindowAttribute(hwnd, 20, ref value, Marshal.SizeOf(value));
+        DwmSetWindowAttribute(hwnd, 19, ref value, Marshal.SizeOf(value));
     }
 
     // ── Tab switching ──────────────────────────────────────────────────────
@@ -105,7 +110,6 @@ public partial class PreferencesWindow : Window
     private void OnTabChanged(object sender, RoutedEventArgs e)
     {
         GeneralPanel.Visibility = TabGeneral.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        StylePanel.Visibility   = TabStyle.IsChecked   == true ? Visibility.Visible : Visibility.Collapsed;
         AboutPanel.Visibility   = TabAbout.IsChecked   == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -186,7 +190,7 @@ public partial class PreferencesWindow : Window
             HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
     }
 
-    // ── Style tab: icon grid ───────────────────────────────────────────────
+    // ── Icon grid ───────────────────────────────────────────────────────────
 
     private readonly Dictionary<string, Border> _iconCards = new();
 
@@ -208,37 +212,21 @@ public partial class PreferencesWindow : Window
                 ToolTip = style,
             };
 
-            if (style == "Custom")
+            using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
+            var img = new WpfImage
             {
-                card.Child = new TextBlock
-                {
-                    Text = "+",
-                    FontSize = 24,
-                    FontWeight = FontWeights.Light,
-                    Foreground = (WpfBrush)FindResource("FgSecondary"),
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-            }
-            else
-            {
-                using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
-                var img = new WpfImage
-                {
-                    Source = BitmapToSource(bmp),
-                    Width = 36, Height = 36,
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.NearestNeighbor);
-                card.Child = img;
-            }
+                Source = BitmapToSource(bmp),
+                Width = 36, Height = 36,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.NearestNeighbor);
+            card.Child = img;
 
             card.MouseLeftButtonDown += (_, _) =>
             {
                 _settings.IconStyle = style;
                 HighlightSelectedIcon();
-                UpdateCustomIconPanelVisibility();
                 UpdateGeneralPreview();
                 _onSettingsChanged?.Invoke();
             };
@@ -259,14 +247,13 @@ public partial class PreferencesWindow : Window
     {
         foreach (var (style, card) in _iconCards)
         {
-            if (style == "Custom") continue;
             using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
             if (card.Child is WpfImage img)
                 img.Source = BitmapToSource(bmp);
         }
     }
 
-    // ── Style tab: color themes ────────────────────────────────────────────
+    // ── Color themes ──────────────────────────────────────────────────────
 
     private void BuildThemePanel()
     {
@@ -362,38 +349,6 @@ public partial class PreferencesWindow : Window
                 _onSettingsChanged?.Invoke();
             };
             panel.Children.Add(btn);
-        }
-    }
-
-    // ── Mute style ─────────────────────────────────────────────────────────
-
-    private void OnMuteStyleChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (MuteStyleBox.SelectedItem is not string style) return;
-        _settings.MuteStyle = style;
-        _onSettingsChanged?.Invoke();
-    }
-
-    // ── Custom icon ────────────────────────────────────────────────────────
-
-    private void UpdateCustomIconPanelVisibility()
-    {
-        CustomIconPanel.Visibility =
-            _settings.IconStyle == "Custom" ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void OnBrowseCustomIcon(object sender, RoutedEventArgs e)
-    {
-        var dlg = new WpfOpenFileDialog
-        {
-            Title  = "Select custom icon",
-            Filter = "Image files (*.ico;*.png;*.bmp)|*.ico;*.png;*.bmp|All files (*.*)|*.*",
-        };
-        if (dlg.ShowDialog(this) == true)
-        {
-            _settings.CustomIconPath = dlg.FileName;
-            CustomIconPathText.Text  = Path.GetFileName(dlg.FileName);
-            _onSettingsChanged?.Invoke();
         }
     }
 
