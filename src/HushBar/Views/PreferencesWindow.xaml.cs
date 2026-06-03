@@ -1,8 +1,12 @@
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using HushBar.Models;
 using HushBar.Services;
 using WpfButton = System.Windows.Controls.Button;
@@ -20,7 +24,6 @@ public partial class PreferencesWindow : Window
     private readonly MicMuteService? _mic;
     private readonly HotKeyManager? _hotKey;
     private readonly Action? _onSettingsChanged;
-    private bool _loading;
     private bool _recording;
 
     private static readonly DrawingColor[] Palette =
@@ -41,6 +44,18 @@ public partial class PreferencesWindow : Window
         DrawingColor.Black,
     };
 
+    private static readonly (string Name, DrawingColor On, DrawingColor Off)[] ColorThemes =
+    {
+        ("Classic",  DrawingColor.FromArgb(255,  52, 199,  89), DrawingColor.FromArgb(255, 142, 142, 147)),
+        ("Traffic",  DrawingColor.FromArgb(255,  52, 199,  89), DrawingColor.FromArgb(255, 255,  59,  48)),
+        ("Ocean",    DrawingColor.FromArgb(255,   0, 122, 255), DrawingColor.FromArgb(255, 142, 142, 147)),
+        ("Neon",     DrawingColor.FromArgb(255,  90, 200, 250), DrawingColor.FromArgb(255, 255,  45,  85)),
+        ("Amber",    DrawingColor.FromArgb(255, 255, 149,   0), DrawingColor.FromArgb(255,  72,  72,  74)),
+        ("Royal",    DrawingColor.FromArgb(255, 175,  82, 222), DrawingColor.FromArgb(255, 142, 142, 147)),
+        ("Mono",     DrawingColor.White,                        DrawingColor.FromArgb(255, 142, 142, 147)),
+        ("Mint",     DrawingColor.FromArgb(255,   0, 199, 190), DrawingColor.FromArgb(255,  72,  72,  74)),
+    };
+
     public PreferencesWindow(AppSettings settings, MicMuteService? mic = null,
                              HotKeyManager? hotKey = null, Action? onSettingsChanged = null)
     {
@@ -49,11 +64,6 @@ public partial class PreferencesWindow : Window
         _mic = mic;
         _hotKey = hotKey;
         _onSettingsChanged = onSettingsChanged;
-
-        PopulateColorPalette(OnColorPalette,      ColorTarget.BadgeOn);
-        PopulateColorPalette(OnTextColorPalette,  ColorTarget.TextOn);
-        PopulateColorPalette(OffColorPalette,     ColorTarget.BadgeOff);
-        PopulateColorPalette(OffTextColorPalette, ColorTarget.TextOff);
 
         SoundCheck.IsChecked = _settings.PlaySoundOnToggle;
         SoundCheck.Checked   += (_, _) => _settings.PlaySoundOnToggle = true;
@@ -65,20 +75,20 @@ public partial class PreferencesWindow : Window
 
         HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
 
-        // Icon / mute style pickers - populate then wire events so initialisation doesn't fire handlers
-        IconStyleBox.ItemsSource  = TrayIconRenderer.IconStyles;
+        BuildIconGrid();
+        BuildThemePanel();
+        PopulateColorPalette(OnColorPalette, true);
+        PopulateColorPalette(OffColorPalette, false);
+        UpdateColorSwatches();
+
         MuteStyleBox.ItemsSource  = TrayIconRenderer.MuteStyles;
-        IconStyleBox.SelectedItem = _settings.IconStyle;
         MuteStyleBox.SelectedItem = _settings.MuteStyle;
-
-        if (!string.IsNullOrEmpty(_settings.CustomIconPath))
-            CustomIconPathText.Text = System.IO.Path.GetFileName(_settings.CustomIconPath);
-        UpdateCustomIconPanelVisibility();
-
-        IconStyleBox.SelectionChanged += OnIconStyleChanged;
         MuteStyleBox.SelectionChanged += OnMuteStyleChanged;
 
-        RefreshPresetList();
+        if (!string.IsNullOrEmpty(_settings.CustomIconPath))
+            CustomIconPathText.Text = Path.GetFileName(_settings.CustomIconPath);
+        UpdateCustomIconPanelVisibility();
+
         UpdateGeneralPreview();
         UpdateMicStatus();
 
@@ -86,7 +96,7 @@ public partial class PreferencesWindow : Window
             _mic.MuteChanged += _ => Dispatcher.Invoke(UpdateMicStatus);
     }
 
-    // -- Tab switching
+    // ── Tab switching ────────────────────────────────────────────────────────────
 
     private void OnTabChanged(object sender, RoutedEventArgs e)
     {
@@ -95,18 +105,16 @@ public partial class PreferencesWindow : Window
         AboutPanel.Visibility   = TabAbout.IsChecked   == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    // -- General tab
+    // ── General tab ──────────────────────────────────────────────────────────────
 
     private void UpdateGeneralPreview()
     {
-        var preset = _settings.SelectedPreset;
-        GenPreviewOnBorder.Background  = ToBrush(preset.OnColor);
-        GenPreviewOnText.Text          = preset.OnText;
-        GenPreviewOnText.Foreground    = ToBrush(preset.OnTextColor);
-        GenPreviewOffBorder.Background = ToBrush(preset.OffColor);
-        GenPreviewOffText.Text         = preset.OffText;
-        GenPreviewOffText.Foreground   = ToBrush(preset.OffTextColor);
-        GenPreviewName.Text            = preset.Name;
+        GenPreviewStyle.Text = _settings.IconStyle;
+        GenOnColorDot.Background  = ToBrush(_settings.OnColor);
+        GenOffColorDot.Background = ToBrush(_settings.OffColor);
+
+        using var bmp = TrayIconRenderer.RenderPreview(_settings.IconStyle, _settings.OnColor);
+        GenPreviewIcon.Source = BitmapToSource(bmp);
     }
 
     private void UpdateMicStatus()
@@ -122,7 +130,7 @@ public partial class PreferencesWindow : Window
         MicStatusText.Text = muted ? "Muted" : "Live";
     }
 
-    // -- Hotkey capture
+    // ── Hotkey capture ───────────────────────────────────────────────────────────
 
     private void OnHotKeyRecord(object sender, RoutedEventArgs e)
     {
@@ -174,91 +182,154 @@ public partial class PreferencesWindow : Window
             HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
     }
 
-    // -- Style tab: preset list
+    // ── Style tab: icon grid ───────────────────────────────────────────────────────
 
-    private void RefreshPresetList()
+    private readonly Dictionary<string, Border> _iconCards = new();
+
+    private void BuildIconGrid()
     {
-        _loading = true;
-        var selectedId = (PresetList.SelectedItem as BarPreset)?.Id ?? _settings.SelectedPresetId;
-        PresetList.ItemsSource = null;
-        PresetList.ItemsSource = _settings.Presets;
-        PresetList.SelectedItem = _settings.Presets.FirstOrDefault(p => p.Id == selectedId)
-                                  ?? _settings.Presets.FirstOrDefault();
-        _loading = false;
-        LoadSelectedPreset();
+        foreach (var style in TrayIconRenderer.IconStyles)
+        {
+            var card = new Border
+            {
+                Width = 64, Height = 64,
+                CornerRadius = new CornerRadius(8),
+                Background = new SolidColorBrush(WpfColor.FromRgb(0x38, 0x38, 0x38)),
+                BorderThickness = new Thickness(2),
+                BorderBrush = style == _settings.IconStyle
+                    ? (Brush)FindResource("Accent")
+                    : System.Windows.Media.Brushes.Transparent,
+                Margin = new Thickness(3),
+                Cursor = Cursors.Hand,
+                ToolTip = style,
+            };
+
+            if (style == "Custom")
+            {
+                card.Child = new TextBlock
+                {
+                    Text = "+",
+                    FontSize = 24,
+                    FontWeight = FontWeights.Light,
+                    Foreground = (Brush)FindResource("FgSecondary"),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+            }
+            else
+            {
+                using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
+                card.Child = new System.Windows.Controls.Image
+                {
+                    Source = BitmapToSource(bmp),
+                    Width = 36, Height = 36,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    RenderOptions = { },
+                };
+                RenderOptions.SetBitmapScalingMode((System.Windows.Controls.Image)card.Child, BitmapScalingMode.NearestNeighbor);
+            }
+
+            card.MouseLeftButtonDown += (_, _) =>
+            {
+                _settings.IconStyle = style;
+                HighlightSelectedIcon();
+                UpdateCustomIconPanelVisibility();
+                UpdateGeneralPreview();
+                _onSettingsChanged?.Invoke();
+            };
+
+            _iconCards[style] = card;
+            IconGrid.Children.Add(card);
+        }
     }
 
-    private void OnPresetSelected(object sender, SelectionChangedEventArgs e)
+    private void HighlightSelectedIcon()
     {
-        if (_loading) return;
-        LoadSelectedPreset();
+        var accent = (Brush)FindResource("Accent");
+        foreach (var (style, card) in _iconCards)
+            card.BorderBrush = style == _settings.IconStyle ? accent : System.Windows.Media.Brushes.Transparent;
     }
 
-    private BarPreset? SelectedPreset => PresetList.SelectedItem as BarPreset;
-
-    private void LoadSelectedPreset()
+    private void RefreshIconGridColors()
     {
-        var preset = SelectedPreset;
-        bool hasPreset = preset is not null;
-        EditorPanel.IsEnabled = hasPreset;
-        if (!hasPreset) return;
-
-        _loading = true;
-        NameBox.Text           = preset!.Name;
-        OnTextBox.Text         = preset.OnText;
-        OffTextBox.Text        = preset.OffText;
-        OnColorBtn.Background      = ToBrush(preset.OnColor);
-        OnTextColorBtn.Background  = ToBrush(preset.OnTextColor);
-        OffColorBtn.Background     = ToBrush(preset.OffColor);
-        OffTextColorBtn.Background = ToBrush(preset.OffTextColor);
-        _loading = false;
-
-        UpdateStylePreview();
+        foreach (var (style, card) in _iconCards)
+        {
+            if (style == "Custom") continue;
+            using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
+            if (card.Child is System.Windows.Controls.Image img)
+                img.Source = BitmapToSource(bmp);
+        }
     }
 
-    private void OnNameChanged(object sender, TextChangedEventArgs e)
+    // ── Style tab: color themes ────────────────────────────────────────────────────
+
+    private void BuildThemePanel()
     {
-        if (_loading || SelectedPreset is null) return;
-        SelectedPreset.Name = NameBox.Text;
-        RefreshPresetList();
+        foreach (var (name, on, off) in ColorThemes)
+        {
+            var stack = new StackPanel
+            {
+                Orientation = Orientation.Vertical,
+                Margin = new Thickness(3),
+                Cursor = Cursors.Hand,
+                ToolTip = name,
+            };
+
+            var container = new Border
+            {
+                CornerRadius = new CornerRadius(6),
+                Background = new SolidColorBrush(WpfColor.FromRgb(0x38, 0x38, 0x38)),
+                Padding = new Thickness(6, 5, 6, 5),
+            };
+
+            var dots = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
+            dots.Children.Add(new Border { Width = 14, Height = 14, CornerRadius = new CornerRadius(7), Background = ToBrush(on), Margin = new Thickness(0, 0, 3, 0) });
+            dots.Children.Add(new Border { Width = 14, Height = 14, CornerRadius = new CornerRadius(7), Background = ToBrush(off) });
+            container.Child = dots;
+
+            stack.Children.Add(container);
+            stack.Children.Add(new TextBlock
+            {
+                Text = name,
+                FontSize = 9,
+                Foreground = (Brush)FindResource("FgSecondary"),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 3, 0, 0),
+            });
+
+            stack.MouseLeftButtonDown += (_, _) =>
+            {
+                _settings.OnColorArgb  = on.ToArgb();
+                _settings.OffColorArgb = off.ToArgb();
+                UpdateColorSwatches();
+                RefreshIconGridColors();
+                UpdateGeneralPreview();
+                _onSettingsChanged?.Invoke();
+            };
+
+            ThemePanel.Children.Add(stack);
+        }
     }
 
-    private void OnOnTextChanged(object sender, TextChangedEventArgs e)
+    private void OnToggleCustomColors(object sender, RoutedEventArgs e)
     {
-        if (_loading || SelectedPreset is null) return;
-        SelectedPreset.OnText = OnTextBox.Text;
-        UpdateStylePreview();
+        CustomColorPanel.Visibility = CustomColorPanel.Visibility == Visibility.Visible
+            ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    private void OnOffTextChanged(object sender, TextChangedEventArgs e)
+    private void UpdateColorSwatches()
     {
-        if (_loading || SelectedPreset is null) return;
-        SelectedPreset.OffText = OffTextBox.Text;
-        UpdateStylePreview();
+        OnColorBtn.Background  = ToBrush(_settings.OnColor);
+        OffColorBtn.Background = ToBrush(_settings.OffColor);
     }
 
-    private void UpdateStylePreview()
-    {
-        var preset = SelectedPreset;
-        if (preset is null) return;
-        PreviewOnBorder.Background  = ToBrush(preset.OnColor);
-        PreviewOnText.Text          = preset.OnText;
-        PreviewOnText.Foreground    = ToBrush(preset.OnTextColor);
-        PreviewOffBorder.Background = ToBrush(preset.OffColor);
-        PreviewOffText.Text         = preset.OffText;
-        PreviewOffText.Foreground   = ToBrush(preset.OffTextColor);
-    }
+    // ── Color pickers ────────────────────────────────────────────────────────────
 
-    // -- Color pickers
+    private void OnOnColorClick(object sender, RoutedEventArgs e)  => OnColorPopup.IsOpen  = true;
+    private void OnOffColorClick(object sender, RoutedEventArgs e) => OffColorPopup.IsOpen = true;
 
-    private enum ColorTarget { BadgeOn, TextOn, BadgeOff, TextOff }
-
-    private void OnOnColorClick(object sender, RoutedEventArgs e)      => OnColorPopup.IsOpen      = true;
-    private void OnOnTextColorClick(object sender, RoutedEventArgs e)  => OnTextColorPopup.IsOpen  = true;
-    private void OnOffColorClick(object sender, RoutedEventArgs e)     => OffColorPopup.IsOpen     = true;
-    private void OnOffTextColorClick(object sender, RoutedEventArgs e) => OffTextColorPopup.IsOpen = true;
-
-    private void PopulateColorPalette(WrapPanel panel, ColorTarget target)
+    private void PopulateColorPalette(WrapPanel panel, bool isOn)
     {
         foreach (var color in Palette)
         {
@@ -270,91 +341,27 @@ public partial class PreferencesWindow : Window
             };
             btn.Click += (_, _) =>
             {
-                if (SelectedPreset is null) return;
                 var c = (DrawingColor)btn.Tag;
-                switch (target)
+                if (isOn)
                 {
-                    case ColorTarget.BadgeOn:
-                        SelectedPreset.OnColorArgb    = c.ToArgb();
-                        OnColorBtn.Background         = ToBrush(c);
-                        OnColorPopup.IsOpen           = false;
-                        break;
-                    case ColorTarget.TextOn:
-                        SelectedPreset.OnTextColorArgb = c.ToArgb();
-                        OnTextColorBtn.Background      = ToBrush(c);
-                        OnTextColorPopup.IsOpen        = false;
-                        break;
-                    case ColorTarget.BadgeOff:
-                        SelectedPreset.OffColorArgb   = c.ToArgb();
-                        OffColorBtn.Background        = ToBrush(c);
-                        OffColorPopup.IsOpen          = false;
-                        break;
-                    case ColorTarget.TextOff:
-                        SelectedPreset.OffTextColorArgb = c.ToArgb();
-                        OffTextColorBtn.Background      = ToBrush(c);
-                        OffTextColorPopup.IsOpen        = false;
-                        break;
+                    _settings.OnColorArgb = c.ToArgb();
+                    OnColorPopup.IsOpen   = false;
                 }
-                UpdateStylePreview();
+                else
+                {
+                    _settings.OffColorArgb = c.ToArgb();
+                    OffColorPopup.IsOpen   = false;
+                }
+                UpdateColorSwatches();
+                RefreshIconGridColors();
+                UpdateGeneralPreview();
+                _onSettingsChanged?.Invoke();
             };
             panel.Children.Add(btn);
         }
     }
 
-    // -- Preset actions
-
-    private void OnAddPreset(object sender, RoutedEventArgs e)
-    {
-        var preset = new BarPreset { Name = "New Preset" };
-        _settings.Presets.Add(preset);
-        _settings.SelectedPresetId = preset.Id;
-        RefreshPresetList();
-    }
-
-    private void OnRemovePreset(object sender, RoutedEventArgs e)
-    {
-        if (SelectedPreset is null || _settings.Presets.Count <= 1) return;
-        _settings.Presets.Remove(SelectedPreset);
-        _settings.SelectedPresetId = _settings.Presets[0].Id;
-        RefreshPresetList();
-        UpdateGeneralPreview();
-    }
-
-    private void OnUsePreset(object sender, RoutedEventArgs e)
-    {
-        if (SelectedPreset is null) return;
-        _settings.SelectedPresetId = SelectedPreset.Id;
-        UpdateGeneralPreview();
-        _onSettingsChanged?.Invoke();
-    }
-
-    private void OnDuplicatePreset(object sender, RoutedEventArgs e)
-    {
-        if (SelectedPreset is null) return;
-        var clone = SelectedPreset.Clone();
-        _settings.Presets.Add(clone);
-        _settings.SelectedPresetId = clone.Id;
-        RefreshPresetList();
-    }
-
-    private void OnResetPresets(object sender, RoutedEventArgs e)
-    {
-        _settings.Presets = BarPreset.Defaults();
-        _settings.SelectedPresetId = _settings.Presets[0].Id;
-        RefreshPresetList();
-        UpdateGeneralPreview();
-        _onSettingsChanged?.Invoke();
-    }
-
-    // -- Icon / Mute style
-
-    private void OnIconStyleChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (IconStyleBox.SelectedItem is not string style) return;
-        _settings.IconStyle = style;
-        UpdateCustomIconPanelVisibility();
-        _onSettingsChanged?.Invoke();
-    }
+    // ── Mute style ───────────────────────────────────────────────────────────────
 
     private void OnMuteStyleChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -362,6 +369,8 @@ public partial class PreferencesWindow : Window
         _settings.MuteStyle = style;
         _onSettingsChanged?.Invoke();
     }
+
+    // ── Custom icon ──────────────────────────────────────────────────────────────
 
     private void UpdateCustomIconPanelVisibility()
     {
@@ -379,12 +388,12 @@ public partial class PreferencesWindow : Window
         if (dlg.ShowDialog(this) == true)
         {
             _settings.CustomIconPath = dlg.FileName;
-            CustomIconPathText.Text  = System.IO.Path.GetFileName(dlg.FileName);
+            CustomIconPathText.Text  = Path.GetFileName(dlg.FileName);
             _onSettingsChanged?.Invoke();
         }
     }
 
-    // -- About tab links
+    // ── About tab links ──────────────────────────────────────────────────────────
 
     private static void OpenUrl(string url)
     {
@@ -400,8 +409,22 @@ public partial class PreferencesWindow : Window
     private void OnOpenSpotify(object sender, RoutedEventArgs e)   => OpenUrl("https://open.spotify.com/user/11146430303?si=2bff0a4ba1484781");
     private void OnOpenLinkedIn(object sender, RoutedEventArgs e)  => OpenUrl("https://linkedin.com/in/ardacanbakis");
 
-    // -- Helpers
+    // ── Helpers ────────────────────────────────────────────────────────────────
 
     private static SolidColorBrush ToBrush(DrawingColor c) =>
         new(WpfColor.FromArgb(c.A, c.R, c.G, c.B));
+
+    private static BitmapSource BitmapToSource(System.Drawing.Bitmap bmp)
+    {
+        using var ms = new MemoryStream();
+        bmp.Save(ms, ImageFormat.Png);
+        ms.Position = 0;
+        var img = new BitmapImage();
+        img.BeginInit();
+        img.CacheOption = BitmapCacheOption.OnLoad;
+        img.StreamSource = ms;
+        img.EndInit();
+        img.Freeze();
+        return img;
+    }
 }

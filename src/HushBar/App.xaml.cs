@@ -74,15 +74,14 @@ public partial class App : Application
     private void RefreshTray()
     {
         if (_tray is null || _mic is null) return;
-        var preset = _settings.SelectedPreset;
 
         var oldIcon = _tray.Icon;
         _tray.Icon = TrayIconRenderer.Render(
-            _mic.IsMuted, preset.OnColor, preset.OffColor,
+            _mic.IsMuted, _settings.OnColor, _settings.OffColor,
             _settings.IconStyle, _settings.MuteStyle, _settings.CustomIconPath);
         oldIcon?.Dispose();
 
-        _tray.Text = preset.Tooltip(_mic.IsMuted);
+        _tray.Text = _mic.IsMuted ? "HushBar — Muted" : "HushBar — Live";
         if (_muteItem is not null) _muteItem.Text = _mic.IsMuted ? "Unmute" : "Mute";
 
         if (_settings.PlaySoundOnToggle)

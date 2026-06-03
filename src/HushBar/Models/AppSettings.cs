@@ -17,6 +17,14 @@ public sealed class AppSettings
     public string MuteStyle { get; set; } = "DiagonalSlash";
     public string? CustomIconPath { get; set; }
 
+    public int OnColorArgb { get; set; } = System.Drawing.Color.FromArgb(255, 52, 199, 89).ToArgb();
+    public int OffColorArgb { get; set; } = System.Drawing.Color.FromArgb(255, 142, 142, 147).ToArgb();
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public System.Drawing.Color OnColor => System.Drawing.Color.FromArgb(OnColorArgb);
+    [System.Text.Json.Serialization.JsonIgnore]
+    public System.Drawing.Color OffColor => System.Drawing.Color.FromArgb(OffColorArgb);
+
     [System.Text.Json.Serialization.JsonIgnore]
     public BarPreset SelectedPreset =>
         Presets.FirstOrDefault(p => p.Id == SelectedPresetId) ?? Presets[0];
