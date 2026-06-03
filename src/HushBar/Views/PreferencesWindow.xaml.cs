@@ -10,9 +10,13 @@ using System.Windows.Media.Imaging;
 using HushBar.Models;
 using HushBar.Services;
 using WpfButton = System.Windows.Controls.Button;
+using WpfImage = System.Windows.Controls.Image;
 using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
+using WpfCursors = System.Windows.Input.Cursors;
+using WpfOrientation = System.Windows.Controls.Orientation;
 using DrawingColor = System.Drawing.Color;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
@@ -96,7 +100,7 @@ public partial class PreferencesWindow : Window
             _mic.MuteChanged += _ => Dispatcher.Invoke(UpdateMicStatus);
     }
 
-    // ── Tab switching ────────────────────────────────────────────────────────────
+    // ── Tab switching ──────────────────────────────────────────────────────
 
     private void OnTabChanged(object sender, RoutedEventArgs e)
     {
@@ -105,7 +109,7 @@ public partial class PreferencesWindow : Window
         AboutPanel.Visibility   = TabAbout.IsChecked   == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    // ── General tab ──────────────────────────────────────────────────────────────
+    // ── General tab ────────────────────────────────────────────────────────
 
     private void UpdateGeneralPreview()
     {
@@ -130,7 +134,7 @@ public partial class PreferencesWindow : Window
         MicStatusText.Text = muted ? "Muted" : "Live";
     }
 
-    // ── Hotkey capture ───────────────────────────────────────────────────────────
+    // ── Hotkey capture ─────────────────────────────────────────────────────
 
     private void OnHotKeyRecord(object sender, RoutedEventArgs e)
     {
@@ -182,7 +186,7 @@ public partial class PreferencesWindow : Window
             HotKeyDisplay.Text = HotKeyManager.Describe(_settings.HotKeyModifiers, _settings.HotKeyVk);
     }
 
-    // ── Style tab: icon grid ───────────────────────────────────────────────────────
+    // ── Style tab: icon grid ───────────────────────────────────────────────
 
     private readonly Dictionary<string, Border> _iconCards = new();
 
@@ -197,10 +201,10 @@ public partial class PreferencesWindow : Window
                 Background = new SolidColorBrush(WpfColor.FromRgb(0x38, 0x38, 0x38)),
                 BorderThickness = new Thickness(2),
                 BorderBrush = style == _settings.IconStyle
-                    ? (Brush)FindResource("Accent")
-                    : System.Windows.Media.Brushes.Transparent,
+                    ? (WpfBrush)FindResource("Accent")
+                    : WpfBrushes.Transparent,
                 Margin = new Thickness(3),
-                Cursor = Cursors.Hand,
+                Cursor = WpfCursors.Hand,
                 ToolTip = style,
             };
 
@@ -211,23 +215,23 @@ public partial class PreferencesWindow : Window
                     Text = "+",
                     FontSize = 24,
                     FontWeight = FontWeights.Light,
-                    Foreground = (Brush)FindResource("FgSecondary"),
-                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Foreground = (WpfBrush)FindResource("FgSecondary"),
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                 };
             }
             else
             {
                 using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
-                card.Child = new System.Windows.Controls.Image
+                var img = new WpfImage
                 {
                     Source = BitmapToSource(bmp),
                     Width = 36, Height = 36,
-                    HorizontalAlignment = HorizontalAlignment.Center,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    RenderOptions = { },
                 };
-                RenderOptions.SetBitmapScalingMode((System.Windows.Controls.Image)card.Child, BitmapScalingMode.NearestNeighbor);
+                RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.NearestNeighbor);
+                card.Child = img;
             }
 
             card.MouseLeftButtonDown += (_, _) =>
@@ -246,9 +250,9 @@ public partial class PreferencesWindow : Window
 
     private void HighlightSelectedIcon()
     {
-        var accent = (Brush)FindResource("Accent");
+        var accent = (WpfBrush)FindResource("Accent");
         foreach (var (style, card) in _iconCards)
-            card.BorderBrush = style == _settings.IconStyle ? accent : System.Windows.Media.Brushes.Transparent;
+            card.BorderBrush = style == _settings.IconStyle ? accent : WpfBrushes.Transparent;
     }
 
     private void RefreshIconGridColors()
@@ -257,12 +261,12 @@ public partial class PreferencesWindow : Window
         {
             if (style == "Custom") continue;
             using var bmp = TrayIconRenderer.RenderPreview(style, _settings.OnColor);
-            if (card.Child is System.Windows.Controls.Image img)
+            if (card.Child is WpfImage img)
                 img.Source = BitmapToSource(bmp);
         }
     }
 
-    // ── Style tab: color themes ────────────────────────────────────────────────────
+    // ── Style tab: color themes ────────────────────────────────────────────
 
     private void BuildThemePanel()
     {
@@ -270,9 +274,9 @@ public partial class PreferencesWindow : Window
         {
             var stack = new StackPanel
             {
-                Orientation = Orientation.Vertical,
+                Orientation = WpfOrientation.Vertical,
                 Margin = new Thickness(3),
-                Cursor = Cursors.Hand,
+                Cursor = WpfCursors.Hand,
                 ToolTip = name,
             };
 
@@ -283,7 +287,7 @@ public partial class PreferencesWindow : Window
                 Padding = new Thickness(6, 5, 6, 5),
             };
 
-            var dots = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
+            var dots = new StackPanel { Orientation = WpfOrientation.Horizontal, HorizontalAlignment = System.Windows.HorizontalAlignment.Center };
             dots.Children.Add(new Border { Width = 14, Height = 14, CornerRadius = new CornerRadius(7), Background = ToBrush(on), Margin = new Thickness(0, 0, 3, 0) });
             dots.Children.Add(new Border { Width = 14, Height = 14, CornerRadius = new CornerRadius(7), Background = ToBrush(off) });
             container.Child = dots;
@@ -293,8 +297,8 @@ public partial class PreferencesWindow : Window
             {
                 Text = name,
                 FontSize = 9,
-                Foreground = (Brush)FindResource("FgSecondary"),
-                HorizontalAlignment = HorizontalAlignment.Center,
+                Foreground = (WpfBrush)FindResource("FgSecondary"),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                 Margin = new Thickness(0, 3, 0, 0),
             });
 
@@ -324,7 +328,7 @@ public partial class PreferencesWindow : Window
         OffColorBtn.Background = ToBrush(_settings.OffColor);
     }
 
-    // ── Color pickers ────────────────────────────────────────────────────────────
+    // ── Color pickers ──────────────────────────────────────────────────────
 
     private void OnOnColorClick(object sender, RoutedEventArgs e)  => OnColorPopup.IsOpen  = true;
     private void OnOffColorClick(object sender, RoutedEventArgs e) => OffColorPopup.IsOpen = true;
@@ -361,7 +365,7 @@ public partial class PreferencesWindow : Window
         }
     }
 
-    // ── Mute style ───────────────────────────────────────────────────────────────
+    // ── Mute style ─────────────────────────────────────────────────────────
 
     private void OnMuteStyleChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -370,7 +374,7 @@ public partial class PreferencesWindow : Window
         _onSettingsChanged?.Invoke();
     }
 
-    // ── Custom icon ──────────────────────────────────────────────────────────────
+    // ── Custom icon ────────────────────────────────────────────────────────
 
     private void UpdateCustomIconPanelVisibility()
     {
@@ -393,7 +397,7 @@ public partial class PreferencesWindow : Window
         }
     }
 
-    // ── About tab links ──────────────────────────────────────────────────────────
+    // ── About tab links ────────────────────────────────────────────────────
 
     private static void OpenUrl(string url)
     {
@@ -409,7 +413,7 @@ public partial class PreferencesWindow : Window
     private void OnOpenSpotify(object sender, RoutedEventArgs e)   => OpenUrl("https://open.spotify.com/user/11146430303?si=2bff0a4ba1484781");
     private void OnOpenLinkedIn(object sender, RoutedEventArgs e)  => OpenUrl("https://linkedin.com/in/ardacanbakis");
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    // ── Helpers ────────────────────────────────────────────────────────────
 
     private static SolidColorBrush ToBrush(DrawingColor c) =>
         new(WpfColor.FromArgb(c.A, c.R, c.G, c.B));
