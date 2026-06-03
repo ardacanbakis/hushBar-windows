@@ -10,12 +10,18 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>HushBar</AssemblyName>
     <Version>1.0.0</Version>
+    <ApplicationIcon>Assets\hushBar-logo.ico</ApplicationIcon>
     <!-- No console window; tray-only agent -->
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\hushBar-logo.ico" />
+    <Resource Include="Assets\hushBar-logo.png" />
   </ItemGroup>
 
 </Project>

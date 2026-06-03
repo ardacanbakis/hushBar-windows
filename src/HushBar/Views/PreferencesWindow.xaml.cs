@@ -405,6 +405,7 @@ public partial class PreferencesWindow : Window
         catch { }
     }
 
+    private void OnLogoClick(object sender, RoutedEventArgs e) => OpenUrl("https://ardacanbakis.github.io/hushBar/");
     private void OnBuyMeACoffee(object sender, RoutedEventArgs e) => OpenUrl("https://buymeacoffee.com/ardacanbakis");
     private void OnOpenWebsite(object sender, RoutedEventArgs e)   => OpenUrl("https://ardacanbakis.com");
     private void OnOpenGitHub(object sender, RoutedEventArgs e)    => OpenUrl("https://github.com/ardacanbakis");

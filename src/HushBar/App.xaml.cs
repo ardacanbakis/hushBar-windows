@@ -37,6 +37,16 @@ public partial class App : Application
         RefreshTray();
 
         _hotKey = new HotKeyManager(() => _mic.Toggle(), _settings.HotKeyModifiers, _settings.HotKeyVk);
+
+        if (!StartupManager.IsEnabled)
+        {
+            var result = MessageBox.Show(
+                "Would you like hushBar to launch automatically at login?\n\n" +
+                "You can change this later in Preferences.",
+                "hushBar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+                StartupManager.IsEnabled = true;
+        }
     }
 
     private void BuildTray()

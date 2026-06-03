@@ -1,7 +1,8 @@
 <Window x:Class="HushBar.PreferencesWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="HushBar Preferences"
+        Title="hushBar Preferences"
+        Icon="/Assets/hushBar-logo.ico"
         Width="640" Height="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
@@ -366,6 +367,24 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
+
+                    <!-- Logo footer -->
+                    <Button x:Name="GenLogoBtn" HorizontalAlignment="Center" Margin="0,16,0,0"
+                            Cursor="Hand" Click="OnLogoClick">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="Transparent" CornerRadius="8" Padding="8">
+                                    <Image Source="/Assets/hushBar-logo.png" Width="120"
+                                           RenderOptions.BitmapScalingMode="HighQuality" Opacity="0.7"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#15FFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </StackPanel>
             </Grid>
 
@@ -471,8 +490,23 @@
             <!-- ABOUT TAB -->
             <ScrollViewer x:Name="AboutPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                 <StackPanel Width="400" HorizontalAlignment="Center" Margin="0,30,0,30">
-                    <TextBlock Text="hushBar" FontSize="32" FontWeight="Bold"
-                               Foreground="{StaticResource FgPrimary}" HorizontalAlignment="Center"/>
+                    <!-- Clickable logo -->
+                    <Button x:Name="AboutLogoBtn" HorizontalAlignment="Center" Margin="0,0,0,12"
+                            Cursor="Hand" Click="OnLogoClick">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="10">
+                                    <Image Source="/Assets/hushBar-logo.png" Width="180"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#15FFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     <TextBlock Text="Mute your microphone from the system tray."
                                FontSize="13" Foreground="{StaticResource FgSecondary}"
                                HorizontalAlignment="Center" Margin="0,4,0,0"/>
