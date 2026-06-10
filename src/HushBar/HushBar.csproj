@@ -13,6 +13,8 @@
     <ApplicationIcon>Assets\hushBar-logo.ico</ApplicationIcon>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <_SuppressWPFTrimError>true</_SuppressWPFTrimError>
     <!-- No console window; tray-only agent -->
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
