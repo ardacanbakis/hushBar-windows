@@ -12,7 +12,7 @@ and UI toolkit); only the product concept, branding, and UX are shared.
 
 Swift + CoreAudio + AppKit and C# + WASAPI + WPF share zero source. The only
 common assets are icons, brand, and docs. Keeping the toolchains isolated means
-each repo’s tooling assumptions stay intact and CI/releases stay independent.
+each repo's tooling assumptions stay intact and CI/releases stay independent.
 The two repos cross-link in their READMEs.
 
 ---
@@ -36,7 +36,7 @@ window and the WinForms tray icon coexist.
 
 ---
 
-## How muting works on Windows (the analog to the Mac’s CoreAudio knowledge)
+## How muting works on Windows (the analog to the Mac's CoreAudio knowledge)
 
 ```
 MMDeviceEnumerator
@@ -64,12 +64,12 @@ MMDeviceEnumerator
 
 ## The one big UX divergence: the tray icon is not a text pill
 
-macOS lets the menu bar show an arbitrary-width text badge (“ON AIR”, “Live·Muted”).
+macOS lets the menu bar show an arbitrary-width text badge ("ON AIR", "Live·Muted").
 The Windows tray is a **fixed 16/32 px icon** - you cannot render a wide text pill there.
 
 Approach:
 - Render a **32×32 icon dynamically** (GDI+ / `System.Drawing`) showing a mic glyph
-  tinted with the preset’s on/off color, with a slash when muted. See
+  tinted with the preset's on/off color, with a slash when muted. See
   `Services/TrayIconRenderer.cs`.
 - Put the preset **label text in the tooltip** (`NotifyIcon.Text`).
 - Optional later: a small **flyout window** anchored above the tray that shows the
@@ -107,17 +107,21 @@ So `BarPreset` keeps its colors/labels/state, but the *primary* surface is an ic
 - Live preview of on/off pill badges. Add/remove presets.
 - Reuses the `BarPreset` / `AppSettings` models from `Models/`.
 
-### Phase 5 - Distribution
+### Phase 5 - Distribution  ✅ (GitHub Releases + portable zip)
+- GitHub Releases: automated via GitHub Actions on `v*` tags.
+- Self-contained single-file exe with IL trimming (`PublishTrimmed + TrimMode=partial`).
+- Portable zip — no installer or runtime needed.
+
+### Phase 6 - Future improvements (TODO)
+- **Inno Setup installer** — proper install/uninstall experience with Start Menu shortcut and optional desktop shortcut.
 - **Code signing:** Authenticode cert (DigiCert/Sectigo ~$100–400/yr) or
-  **Azure Trusted Signing** / SignPath (cheaper/free for OSS). Different ecosystem
-  from Apple notarization - no notarytool equivalent; SmartScreen reputation builds
-  over time/with signing.
-- **Package:** MSIX (`MakeAppx`/Visual Studio) for Store + modern installs, or
-  **WiX v4** MSI, or a portable zip for quick sharing.
-- **winget:** submit a manifest to `microsoft/winget-pkgs`; users then run
-  `winget install ardacanbakis.HushBar`. (This is the Homebrew analog.)
-- **Scoop/Chocolatey:** optional extra channels.
-- GitHub Releases: attach `.msi` / `.zip`; tag mirrors the Mac release versioning.
+  **Azure Trusted Signing** / SignPath (cheaper/free for OSS). Eliminates
+  Windows SmartScreen warnings for unsigned exes.
+- **winget package:** submit a manifest to `microsoft/winget-pkgs`; users then run
+  `winget install ardacanbakis.HushBar`.
+- **Scoop/Chocolatey:** optional extra distribution channels.
+- **MSIX packaging** for Microsoft Store submission.
+- **Shared landing page** on GitHub Pages listing both Mac and Windows downloads.
 
 ---
 
@@ -128,6 +132,7 @@ hushbar-windows/
   HushBar.sln
   README.md
   ROADMAP.md                         this file
+  LICENSE                            MIT
   .gitignore
   src/HushBar/
     HushBar.csproj                   net8.0-windows, WPF + WinForms, NAudio
@@ -168,7 +173,7 @@ dotnet run --project src/HushBar
 
 ## Cross-linking
 
-- Add to the macOS repo README: “**Windows version:** ardacanbakis/hushBar-windows” ✅ done.
-- Add to this README: “**macOS version:** ardacanbakis/hushBar” ✅ done.
+- Add to the macOS repo README: "**Windows version:** ardacanbakis/hushBar-windows" ✅ done.
+- Add to this README: "**macOS version:** ardacanbakis/hushBar" ✅ done.
 - Consider a shared landing page on the existing GitHub Pages site listing both
   downloads (Mac DMG/Homebrew, Windows MSI/winget).

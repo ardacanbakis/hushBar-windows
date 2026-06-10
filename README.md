@@ -1,5 +1,4 @@
 # HushBar — Windows
-<img width="360" height="360" alt="image" src="https://github.com/user-attachments/assets/5178a61e-f54f-4aa4-84e5-9a815218fc85" />
 
 **Mute your microphone from the system tray — globally, instantly, across every app.**
 
@@ -28,9 +27,9 @@ ever opened, so nothing is ever recorded.
 
 ## Download
 
-Grab the latest release from [this link](https://github.com/ardacanbakis/hushBar-windows/releases/download/v1.0/hushBar-v1.0-win-x64.zip)
+Grab the latest release from the [Releases](https://github.com/ardacanbakis/hushBar-windows/releases) page.
 
-1. Download `hushBar-v1.0-win-x64.zip`
+1. Download `hushBar-vX.X.X-win-x64.zip`
 2. Extract anywhere
 3. Run `HushBar.exe`
 
@@ -115,6 +114,12 @@ src/HushBar/
 ## Contributing
 
 Pull requests and issues are welcome. If you have ideas for new icon styles, color themes, or distribution improvements, feel free to open an issue.
+
+---
+
+## License
+
+[MIT](LICENSE)
 
 ---
 
