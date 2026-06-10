@@ -11,6 +11,8 @@
     <AssemblyName>HushBar</AssemblyName>
     <Version>1.0.0</Version>
     <ApplicationIcon>Assets\hushBar-logo.ico</ApplicationIcon>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
     <!-- No console window; tray-only agent -->
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
